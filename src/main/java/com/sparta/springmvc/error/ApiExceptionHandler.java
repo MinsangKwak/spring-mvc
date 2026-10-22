@@ -30,7 +30,7 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
                     String field = path.substring(path.lastIndexOf('.') + 1);
                     return new ApiError.FieldError(field, field.equals("age")
                             ? "나이는 0부터 150 사이의 정수로 입력해 주세요."
-                            : "이름은 공백 없이 1자 이상, 40자 이내로 입력해 주세요.");
+                            : "이름은 공백만 입력할 수 없으며 최대 40자입니다.");
                 }).toList();
         return ResponseEntity.badRequest().body(new ApiError("INVALID_INPUT", "입력값을 확인해 주세요.", errors));
     }

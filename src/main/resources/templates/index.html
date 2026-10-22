@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="경로·쿼리·폼·JSON 요청과 응답을 직접 비교하는 Spring MVC 실습">
+    <title>Spring MVC · 요청과 응답 실습</title>
+    <link rel="icon" href="data:,">
+    <link rel="stylesheet" href="/css/lab.css">
+    <script src="/js/lab.js" defer></script>
+</head>
+<body>
+<noscript>실습 도구를 사용하려면 JavaScript를 켜 주세요. HTML 응답과 Swagger UI 링크는 아래에서 확인할 수 있습니다.</noscript>
+<a class="skip-link" href="#main">실습으로 바로가기</a>
+<header class="topbar">
+    <a class="brand" href="/" aria-label="Spring MVC 실습 홈"><span class="brand-mark" aria-hidden="true">↔</span> MVC <span class="brand-light">LAB</span></a>
+    <span class="topbar-note">Spring MVC · HTTP playground</span>
+    <a class="button secondary compact" href="/swagger-ui.html">Swagger UI 열기 <span aria-hidden="true">↗</span></a>
+</header>
+<div class="app-shell">
+    <aside class="sidebar">
+        <p class="eyebrow">실습 탐색</p>
+        <nav class="topic-nav" aria-label="실습 주제">
+            <button disabled type="button" class="topic selected" data-topic="request" aria-pressed="true"><span>요청 바인딩</span><small>Path · Query · Form · JSON</small></button>
+            <button disabled type="button" class="topic" data-topic="method" aria-pressed="false"><span>HTTP 메서드</span><small>GET · POST · PUT · DELETE</small></button>
+            <button disabled type="button" class="topic" data-topic="response" aria-pressed="false"><span>응답 형식</span><small>String · Object · Content-Type</small></button>
+        </nav>
+        <div class="sidebar-section">
+            <p class="eyebrow">HTML 응답</p>
+            <a class="text-link" href="/hello.html">정적 리소스 <span aria-hidden="true">↗</span></a>
+            <a class="text-link" href="/html/templates">템플릿 렌더링 <span aria-hidden="true">↗</span></a>
+            <a class="text-link" href="/html/dynamic">동적 데이터 전달 <span aria-hidden="true">↗</span></a>
+            <a class="text-link" href="/html/redirect">리다이렉트 <span aria-hidden="true">↗</span></a>
+        </div>
+        <p class="scope-note">로컬 학습 환경<br>입력값을 DB에 저장하지 않습니다.</p>
+    </aside>
+    <main id="main" tabindex="-1">
+        <section class="intro">
+            <p class="eyebrow">SPRING MVC / REQUEST & RESPONSE</p>
+            <h1>같은 데이터,<br>다른 요청 방식.</h1>
+            <p class="intro-copy">이름과 나이를 보내고, 서버가 읽은 결과를 확인해 보세요.<br class="desktop-break"> 요청의 위치와 형식이 바뀌면 어떤 차이가 생기는지 비교합니다.</p>
+        </section>
+        <section id="request-lab" class="workspace" aria-label="요청과 응답 실습">
+            <div class="request-pane">
+                <div class="pane-heading"><h2 id="topic-heading">요청 바인딩</h2><span class="pane-label">REQUEST</span></div>
+                <form id="lab-form" novalidate>
+                    <div class="field" id="binding-field">
+                        <label for="binding">요청 방식</label>
+                        <select id="binding" name="binding">
+                            <option value="query">쿼리 파라미터 · @RequestParam</option>
+                            <option value="path">경로 변수 · @PathVariable</option>
+                            <option value="form">폼 데이터 · @RequestParam</option>
+                            <option value="model">폼 데이터 · @ModelAttribute</option>
+                            <option value="queryModel">쿼리 데이터 · @ModelAttribute</option>
+                            <option value="json">JSON 본문 · @RequestBody</option>
+                        </select>
+                    </div>
+                    <div class="field" id="method-field" hidden>
+                        <label for="method">HTTP 메서드</label>
+                        <select id="method"><option>GET</option><option>POST</option><option>PUT</option><option>DELETE</option></select>
+                    </div>
+                    <div class="field" id="response-field" hidden>
+                        <label for="response-type">응답 방식</label>
+                        <select id="response-type">
+                            <option value="/response/json/string">Controller · 문자열</option>
+                            <option value="/response/json/class">Controller · 객체</option>
+                            <option value="/response/rest/json/string">RestController · 문자열</option>
+                            <option value="/response/rest/json/class">RestController · 객체</option>
+                        </select>
+                    </div>
+                    <p class="lesson" id="lesson">URL의 ? 뒤에 전달한 값을 개별 메서드 인자로 읽습니다.</p>
+                    <div id="data-fields" class="data-fields">
+                        <div class="field"><label for="name">이름</label><input id="name" name="name" value="민상" maxlength="200" autocomplete="off" aria-describedby="name-help name-error"><small id="name-help">공백만 입력할 수 없으며 최대 40자입니다.</small><span class="field-error" id="name-error"></span></div>
+                        <div class="field"><label for="age">나이</label><input id="age" name="age" value="33" inputmode="numeric" autocomplete="off" aria-describedby="age-help age-error"><small id="age-help">0부터 150 사이의 정수입니다.</small><span class="field-error" id="age-error"></span></div>
+                    </div>
+                    <div class="sample-actions" id="sample-actions"><span>예제 입력</span><button disabled type="button" id="valid-sample">정상값</button><button disabled type="button" id="invalid-sample">오류값</button></div>
+                    <div class="request-preview"><span id="request-method" class="method-badge">GET</span><code id="request-url"></code></div>
+                    <dl class="request-meta"><div><dt>Content-Type</dt><dd id="request-content-type">본문 없음</dd></div><div><dt>Accept</dt><dd id="request-accept">application/json</dd></div></dl>
+                    <details id="request-body-details"><summary>전송할 본문</summary><pre id="request-body">이 요청에는 본문이 없습니다.</pre></details>
+                    <button class="button primary send-button" id="send" type="submit" disabled><span>요청 보내기</span><span aria-hidden="true">→</span></button>
+                </form>
+            </div>
+            <div id="response-pane" class="response-pane" aria-labelledby="response-heading">
+                <div class="pane-heading"><h2 id="response-heading">서버 응답</h2><span class="pane-label">RESPONSE</span></div>
+                <div class="response-meta"><span id="response-status" class="status-badge">대기 중</span><span id="response-time">— ms</span></div>
+                <p id="response-message" role="status" aria-live="polite">요청을 보내면 실제 서버 응답이 여기에 표시됩니다.</p>
+                <dl class="response-headers"><div><dt>Content-Type</dt><dd id="response-content-type">—</dd></div></dl>
+                <pre id="response-body" tabindex="0" aria-label="응답 본문">아직 전송한 요청이 없습니다.</pre>
+                <p class="response-tip">입력값을 바꿔 다시 보내거나, 오류값으로 검증 응답을 확인해 보세요.</p>
+            </div>
+        </section>
+        <section class="reading-note"><h2>어디에서 읽고, 무엇으로 돌려줄까?</h2><p><code>@PathVariable</code>은 경로에서, <code>@RequestParam</code>은 쿼리·폼에서 값을 읽습니다. <code>@ModelAttribute</code>는 쿼리·폼을 객체로 묶고, <code>@RequestBody</code>는 JSON 본문을 객체로 변환합니다.</p><p>Swagger UI에서는 API 명세와 응답 스키마를 확인하고 같은 요청을 직접 실행할 수 있습니다.</p></section>
+        <footer>구직용 학습 프로젝트 · 2023년 기초 실습을 요청·응답 비교와 검증 중심으로 개선했습니다.</footer>
+    </main>
+</div>
+</body>
+</html>

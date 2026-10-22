@@ -1,0 +1,10 @@
+{
+  "profile": "product-admin",
+  "sourceRoots": ["src/main/resources"],
+  "locale": "ko-KR",
+  "canonicalMap": "DESIGN.md",
+  "requiredCapabilities": ["Form", "Select/Listbox", "Scrollbar", "Toast"],
+  "ownership": {"Select/Listbox": "native"},
+  "requiredCommands": ["ui"],
+  "commands": {"ui": "node scripts/check-ui.mjs"}
+}
