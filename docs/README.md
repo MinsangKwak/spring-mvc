@@ -9,6 +9,7 @@
 | [개선 기록](IMPROVEMENTS.md) | 기존 예제에서 바꾼 이유와 검증 근거 |
 | [화면 설계 기준](DESIGN.md) | 레이아웃·색상·입력·상태 처리 기준 |
 | [배포 가이드](DEPLOYMENT.md) | Docker 구성과 Render 배포 절차 |
+| [요청·응답 흐름도 원본](diagrams/request-response-flow.svg) | JSON 바인딩·검증·정상/오류 응답의 연결 |
 | [실행 화면](images/) | 데스크톱·모바일·오류·Swagger 캡처 |
 
 [프로젝트 소개로 돌아가기](../README.md)

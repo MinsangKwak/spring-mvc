@@ -14,24 +14,29 @@
 
 무료 서버를 사용해 한동안 접속이 없으면 첫 화면이 열리기까지 50초 이상 걸릴 수 있습니다. 입력값은 DB에 저장하지 않습니다.
 
-## 저장소 둘러보기
-
-| 위치 | 담고 있는 내용 |
-|---|---|
-| [src](src/) | Spring MVC 실습 코드·웹 화면·서버 테스트 |
-| [docs](docs/) | 실습 순서·개선 기록·화면 설계·배포 방법 |
-| [tools/ui](tools/ui/) | UI 정적 검사와 Playwright 브라우저 검증 도구 |
-| [.github/workflows](.github/workflows/) | 빌드·서버·브라우저·Docker 자동 검증 |
-| [gradle/wrapper](gradle/wrapper/) | 같은 Gradle 버전을 실행하기 위한 Wrapper |
-| `Dockerfile` · `render.yaml` | 컨테이너 빌드와 Render 배포 설정 |
-
-처음 방문했다면 **웹 실습 → [실습 가이드](docs/PRACTICE.md) → [요청 처리 코드](src/main/java/com/sparta/springmvc/request/RequestController.java) → [통합 테스트](src/test/java/com/sparta/springmvc/MvcLabIntegrationTest.java)** 순서로 확인할 수 있습니다. 자세한 경로는 [폴더 구조 안내](docs/STRUCTURE.md)에 정리했습니다.
-
 ## 실행 화면
 
 이름과 나이를 입력하면 요청 URL·헤더·본문과 **실제 서버의 상태 코드·Content-Type·응답 본문**을 같은 화면에서 확인할 수 있습니다.
 
 ![요청 설정과 실제 JSON 응답을 나란히 비교하는 웹 실습 화면](docs/images/lab-desktop.png)
+
+| 화면 영역 | 확인할 내용 |
+|---|---|
+| 요청 설정 | 같은 이름·나이를 경로·쿼리·폼·JSON으로 전달 |
+| 요청 미리보기 | 전송할 URL·HTTP 메서드·헤더·본문 확인 |
+| 서버 응답 | 실제 상태 코드·Content-Type·본문과 필드 오류 비교 |
+
+## 요청은 어떻게 처리되는가
+
+아래 그림은 **JSON 요청 한 건**이 처리되는 흐름입니다. 웹 실습과 Swagger UI는 같은 API를 호출하는 두 가지 입구입니다.
+
+![웹 실습 또는 Swagger UI에서 보낸 JSON을 Spring MVC가 바인딩·검증하고 200 정상 응답 또는 400 오류 응답으로 반환하는 흐름](docs/images/request-response-flow.png)
+
+1. **보내기:** 이름·나이를 입력하고 JSON 요청을 전송합니다.
+2. **읽고 검증하기:** `@RequestBody`로 객체를 만들고 `@Valid`로 이름·나이 제약을 검사합니다.
+3. **비교하기:** 정상 입력은 `BindingResponse`, 제약 위반은 공통 `ApiError`로 돌아옵니다. 상태 코드와 본문을 화면에서 확인합니다.
+
+JSON 문법·타입 오류는 객체를 읽는 단계에서도 발생할 수 있습니다. 위 그림은 정상 JSON과 입력 제약 위반을 비교한 대표 흐름이며, 쿼리·폼·경로 바인딩과 다른 HTTP 오류는 [실습 가이드](docs/PRACTICE.md)에서 확인할 수 있습니다. 수정 가능한 [도식 원본](docs/diagrams/request-response-flow.svg)도 함께 보관합니다.
 
 <details>
 <summary>Swagger UI · 오류 응답 · 모바일 화면 보기</summary>
@@ -49,6 +54,19 @@ Swagger UI에서 JSON 본문을 입력하고 실제 요청을 실행한 화면�
 <img src="docs/images/lab-mobile.png" width="375" alt="모바일 요청·응답 실습 화면">
 
 </details>
+
+## 저장소 둘러보기
+
+| 위치 | 담고 있는 내용 |
+|---|---|
+| [src](src/) | Spring MVC 실습 코드·웹 화면·서버 테스트 |
+| [docs](docs/) | 실습 순서·개선 기록·화면 설계·배포 방법 |
+| [tools/ui](tools/ui/) | UI 정적 검사와 Playwright 브라우저 검증 도구 |
+| [.github/workflows](.github/workflows/) | 빌드·서버·브라우저·Docker 자동 검증 |
+| [gradle/wrapper](gradle/wrapper/) | 같은 Gradle 버전을 실행하기 위한 Wrapper |
+| `Dockerfile` · `render.yaml` | 컨테이너 빌드와 Render 배포 설정 |
+
+처음 방문했다면 **웹 실습 → [실습 가이드](docs/PRACTICE.md) → [요청 처리 코드](src/main/java/com/sparta/springmvc/request/RequestController.java) → [통합 테스트](src/test/java/com/sparta/springmvc/MvcLabIntegrationTest.java)** 순서로 확인할 수 있습니다. 자세한 경로는 [폴더 구조 안내](docs/STRUCTURE.md)에 정리했습니다.
 
 ## 실행 방법
 

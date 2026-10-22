@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="1000" viewBox="0 0 1400 1000" role="img" aria-labelledby="title desc">
+<title id="title">Spring MVC 요청과 응답 흐름</title>
+<desc id="desc">웹 실습 또는 Swagger UI에서 보낸 요청을 Spring MVC가 바인딩하고 검증합니다. 정상 입력은 200 JSON, 제약 위반은 공통 오류 처리기를 거쳐 400 JSON으로 돌아오며 화면에서 실제 응답을 비교합니다.</desc>
+<defs><marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8" fill="none" stroke="#64748b" stroke-width="1.5"/></marker></defs>
+<rect width="1400" height="1000" rx="20" fill="#f4f7fb"/>
+<g font-family="Noto Sans KR, sans-serif">
+<text x="52" y="52" font-size="18" font-weight="650" fill="#2159c7">SPRING MVC LAB  /  REQUEST → RESPONSE</text>
+<text x="52" y="105" font-size="38" font-weight="700" fill="#172d46">입력한 데이터는 어떤 응답으로 돌아올까?</text>
+<text x="52" y="145" font-size="21" font-weight="400" fill="#52677e">JSON 요청 한 건을 기준으로 정상 입력과 검증 오류의 흐름을 비교합니다.</text>
+<rect x="52" y="190" width="610" height="124" rx="12" fill="#ffffff" stroke="#ced8e4"/>
+<text x="76" y="224" font-size="16" font-weight="600" fill="#2159c7">01 · CLIENT</text>
+<text x="76" y="258" font-size="25" font-weight="650" fill="#172d46">웹 실습 화면</text>
+<text x="76" y="292" font-size="18" font-weight="400" fill="#52677e">이름·나이 입력 → URL·헤더·본문 미리보기</text>
+<rect x="738" y="190" width="610" height="124" rx="12" fill="#ffffff" stroke="#ced8e4"/>
+<text x="762" y="224" font-size="16" font-weight="600" fill="#2159c7">01 · CLIENT</text>
+<text x="762" y="258" font-size="25" font-weight="650" fill="#172d46">Swagger UI</text>
+<text x="762" y="292" font-size="18" font-weight="400" fill="#52677e">같은 API 명세에서 Try it out → Execute</text>
+<path d="M357 314 V345 H700 V374" fill="none" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M1043 314 V345 H700" fill="none" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="330" y="374" width="740" height="124" rx="12" fill="#ffffff" stroke="#ced8e4"/>
+<text x="354" y="408" font-size="16" font-weight="600" fill="#2159c7">02 · SPRING MVC</text>
+<text x="354" y="442" font-size="25" font-weight="650" fill="#172d46">경로·메서드 매핑과 JSON 바인딩</text>
+<text x="354" y="476" font-size="18" font-weight="400" fill="#52677e">POST /hello/request/form/json · @RequestBody → Star</text>
+<path d="M700 498 V538" fill="none" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="330" y="538" width="740" height="124" rx="12" fill="#ffffff" stroke="#ced8e4"/>
+<text x="354" y="572" font-size="16" font-weight="600" fill="#2159c7">03 · VALIDATION</text>
+<text x="354" y="606" font-size="25" font-weight="650" fill="#172d46">입력 제약 검사</text>
+<text x="354" y="640" font-size="18" font-weight="400" fill="#52677e">@Valid · 이름 공백/40자 제한 · 나이 0~150의 정수</text>
+<path d="M520 662 V700 H357 V734" fill="none" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M880 662 V700 H1043 V734" fill="none" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)"/>
+<text x="175" y="714" font-size="18" font-weight="600" fill="#146b54">정상 입력</text>
+<text x="1125" y="714" font-size="18" font-weight="600" fill="#ab303b">제약 위반</text>
+<rect x="52" y="734" width="610" height="124" rx="12" fill="#f1faf6" stroke="#8fbaa6"/>
+<text x="76" y="768" font-size="16" font-weight="600" fill="#2159c7">04 · SUCCESS</text>
+<text x="76" y="802" font-size="25" font-weight="650" fill="#172d46">200 OK · BindingResponse</text>
+<text x="76" y="836" font-size="18" font-weight="400" fill="#52677e">binding · name · age를 JSON으로 반환</text>
+<rect x="738" y="734" width="610" height="124" rx="12" fill="#fff5f5" stroke="#d6a2a8"/>
+<text x="762" y="768" font-size="16" font-weight="600" fill="#2159c7">04 · ERROR</text>
+<text x="762" y="802" font-size="25" font-weight="650" fill="#172d46">400 Bad Request · ApiError</text>
+<text x="762" y="836" font-size="18" font-weight="400" fill="#52677e">ApiExceptionHandler → code · message · errors</text>
+<path d="M357 858 V890 H700 V918" fill="none" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M1043 858 V890 H700" fill="none" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)"/>
+<text x="325" y="954" font-size="24" font-weight="600" fill="#172d46">보낸 도구에서 상태 코드 · Content-Type · 실제 본문 확인</text>
+</g></svg>
