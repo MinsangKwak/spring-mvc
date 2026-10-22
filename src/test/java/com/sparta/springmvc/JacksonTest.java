@@ -1,33 +1,24 @@
 package com.sparta.springmvc;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sparta.springmvc.response.Star;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import static org.assertj.core.api.Assertions.assertThat;
 
-public class JacksonTest {
+class JacksonTest {
+    private final ObjectMapper mapper = new ObjectMapper();
 
     @Test
-    @DisplayName("Object To JSON : get Method 필요")
-    void test1() throws JsonProcessingException {
-        Star star = new Star("Robbie", 95);
-
-        ObjectMapper objectMapper = new ObjectMapper(); // Jackson 라이브러리의 ObjectMapper
-        String json = objectMapper.writeValueAsString(star);
-
-        System.out.println("json = " + json);
+    void objectToJsonPreservesValues() throws Exception {
+        var json = mapper.readTree(mapper.writeValueAsString(new Star("민상", 33)));
+        assertThat(json.get("name").asText()).isEqualTo("민상");
+        assertThat(json.get("age").asInt()).isEqualTo(33);
     }
 
     @Test
-    @DisplayName("JSON To Object : 기본 생성자 & (get OR set) Method 필요")
-    void test2() throws JsonProcessingException {
-        String json = "{\"name\":\"Robbie\",\"age\":95}"; // JSON 타입의 String
-
-        ObjectMapper objectMapper = new ObjectMapper(); // Jackson 라이브러리의 ObjectMapper
-
-        Star star = objectMapper.readValue(json, Star.class);
-        System.out.println("star.getName() = " + star.getName());
+    void jsonToObjectPreservesValues() throws Exception {
+        Star star = mapper.readValue("{\"name\":\"민상\",\"age\":33}", Star.class);
+        assertThat(star.getName()).isEqualTo("민상");
+        assertThat(star.getAge()).isEqualTo(33);
     }
-
 }
