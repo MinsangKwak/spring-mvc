@@ -90,7 +90,7 @@
         const form = document.querySelector("#helloPathForm");
         const name = form.querySelector('input[name="name"]').value;
         const age = form.querySelector('input[name="age"]').value;
-        const relativeUrl = `/hello/request/star/${name}/age/${age}`;
+        const relativeUrl = `/hello/request/star/${encodeURIComponent(name)}/age/${encodeURIComponent(age)}`;
         window.location.href = relativeUrl;
     }
 
@@ -113,7 +113,7 @@
         })
 
         const text = await response.text(); // read response body as text
-        document.querySelector("#helloJsonResult").innerHTML = text;
+        document.querySelector("#helloJsonResult").textContent = text;
     };
 </script>
 </html>
