@@ -1,33 +1,26 @@
 package com.sparta.springmvc.html;
 
+import java.util.concurrent.atomic.AtomicLong;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
 @Controller
 public class HtmlController {
+    private final AtomicLong visitCount = new AtomicLong();
 
-    private static long visitCount = 0;
+    @GetMapping("/")
+    public String home() { return "index"; }
 
-    @GetMapping("/static-hello")
-    public String hello() {
-        return "hello.html";
-    }
-
-    @GetMapping("/html/redirect")
-    public String htmlStatic() {
-        return "redirect:/hello.html";
-    }
+    @GetMapping({"/static-hello", "/html/redirect"})
+    public String staticHello() { return "redirect:/hello.html"; }
 
     @GetMapping("/html/templates")
-    public String htmlTemplates() {
-        return "hello";
-    }
+    public String template() { return "hello"; }
 
     @GetMapping("/html/dynamic")
-    public String htmlDynamic(Model model) {
-        visitCount++;
-        model.addAttribute("visits", visitCount);
+    public String dynamic(Model model) {
+        model.addAttribute("visits", visitCount.incrementAndGet());
         return "hello-visit";
     }
 }

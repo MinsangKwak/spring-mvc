@@ -7,68 +7,41 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/hello/request")
 public class RequestController {
     @GetMapping("/form/html")
-    public String helloForm() {
-        return "hello-request-form";
-    }
+    public String helloForm() { return "redirect:/#request-lab"; }
 
-    // [Request sample]
-    // GET http://localhost:8080/hello/request/star/Robbie/age/95
     @GetMapping("/star/{name}/age/{age}")
     @ResponseBody
-    public String helloRequestPath(@PathVariable String name, @PathVariable int age)
-    {
-        return String.format("Hello, @PathVariable.<br> name = %s, age = %d", name, age);
+    public BindingResponse path(@PathVariable("name") String name, @PathVariable("age") Integer age) {
+        return new BindingResponse("@PathVariable", name, age);
     }
 
-    // [Request sample]
-    // GET http://localhost:8080/hello/request/form/param?name=Robbie&age=95
     @GetMapping("/form/param")
     @ResponseBody
-    public String helloGetRequestParam(@RequestParam(required = false) String name, int age) {
-        return String.format("Hello, @RequestParam.<br> name = %s, age = %d", name, age);
+    public BindingResponse query(@RequestParam("name") String name, @RequestParam("age") Integer age) {
+        return new BindingResponse("@RequestParam · query", name, age);
     }
 
-    // [Request sample]
-    // POST http://localhost:8080/hello/request/form/param
-    // Header
-    //  Content type: application/x-www-form-urlencoded
-    // Body
-    //  name=Robbie&age=95
-    @PostMapping("/form/param")
+    @PostMapping(value = "/form/param", consumes = "application/x-www-form-urlencoded")
     @ResponseBody
-    public String helloPostRequestParam(@RequestParam String name, @RequestParam int age) {
-        return String.format("Hello, @RequestParam.<br> name = %s, age = %d", name, age);
+    public BindingResponse form(@RequestParam("name") String name, @RequestParam("age") Integer age) {
+        return new BindingResponse("@RequestParam · form", name, age);
     }
 
-    // [Request sample]
-    // POST http://localhost:8080/hello/request/form/model
-    // Header
-    //  Content type: application/x-www-form-urlencoded
-    // Body
-    //  name=Robbie&age=95
-    @PostMapping("/form/model")
+    @PostMapping(value = "/form/model", consumes = "application/x-www-form-urlencoded")
     @ResponseBody
-    public String helloRequestBodyForm(@ModelAttribute Star star) {
-        return String.format("Hello, @ModelAttribute.<br> (name = %s, age = %d) ", star.name, star.age);
+    public BindingResponse formModel(@ModelAttribute Star star) {
+        return new BindingResponse("@ModelAttribute · form", star.getName(), star.getAge());
     }
 
-    // [Request sample]
-    // GET http://localhost:8080/hello/request/form/param/model?name=Robbie&age=95
     @GetMapping("/form/param/model")
     @ResponseBody
-    public String helloRequestParam(@ModelAttribute Star star) {
-        return String.format("Hello, @ModelAttribute.<br> (name = %s, age = %d) ", star.name, star.age);
+    public BindingResponse queryModel(@ModelAttribute Star star) {
+        return new BindingResponse("@ModelAttribute · query", star.getName(), star.getAge());
     }
 
-    // [Request sample]
-    // POST http://localhost:8080/hello/request/form/json
-    // Header
-    //  Content type: application/json
-    // Body
-    //  {"name":"Robbie","age":"95"}
-    @PostMapping("/form/json")
+    @PostMapping(value = "/form/json", consumes = "application/json")
     @ResponseBody
-    public String helloPostRequestJson(@RequestBody Star star) {
-        return String.format("Hello, @RequestBody.<br> (name = %s, age = %d) ", star.name, star.age);
+    public BindingResponse json(@RequestBody Star star) {
+        return new BindingResponse("@RequestBody · JSON", star.getName(), star.getAge());
     }
 }

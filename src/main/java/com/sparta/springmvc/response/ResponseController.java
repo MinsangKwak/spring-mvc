@@ -1,30 +1,18 @@
 package com.sparta.springmvc.response;
 
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 @Controller
 @RequestMapping("/response")
 public class ResponseController {
-    // [Response header]
-    //   Content-Type: text/html
-    // [Response body]
-    //   {"name":"Robbie","age":95}
-    @GetMapping("/json/string")
+    @GetMapping(value = "/json/string", produces = "text/plain;charset=UTF-8")
     @ResponseBody
-    public String helloStringJson() {
-        return "{\"name\":\"Robbie\",\"age\":95}";
+    public String stringJson() {
+        return "{\"name\":\"민상\",\"age\":33}";
     }
 
-    // [Response header]
-    //   Content-Type: application/json
-    // [Response body]
-    //   {"name":"Robbie","age":95}
-    @GetMapping("/json/class")
+    @GetMapping(value = "/json/class", produces = "application/json")
     @ResponseBody
-    public Star helloClassJson() {
-        return new Star("Robbie", 95);
-    }
+    public Star classJson() { return new Star("민상", 33); }
 }
