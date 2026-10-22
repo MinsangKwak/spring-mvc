@@ -47,6 +47,20 @@ jobs:
             sleep 1
           done
           npm run test:browser
+      - name: Verify deployment container
+        shell: bash
+        run: |
+          docker build -t spring-mvc-lab .
+          docker run -d --name mvc-render-check --memory=512m -p 10000:10000 -e PORT=10000 spring-mvc-lab
+          trap 'docker logs mvc-render-check > build/container.log 2>&1; docker rm -f mvc-render-check >/dev/null' EXIT
+          for attempt in $(seq 1 60); do
+            curl -sf http://127.0.0.1:10000/api/hello >/dev/null && break
+            sleep 1
+          done
+          curl -fsS http://127.0.0.1:10000/api/hello
+          curl -fsS http://127.0.0.1:10000/swagger-ui/index.html >/dev/null
+          curl -fsS http://127.0.0.1:10000/hello/request/form/json -H 'Content-Type: application/json' -d '{"name":"Demo","age":33}' > build/container-response.json
+          node -e "const d=require('./build/container-response.json');if(d.name!=='Demo'||d.age!==33)process.exit(1)"
       - name: Upload verification evidence
         if: always()
         uses: actions/upload-artifact@v4
@@ -57,4 +71,5 @@ jobs:
             build/test-results/test/
             build/browser-screenshots/
             build/server.log
+            build/container.log
           retention-days: 14

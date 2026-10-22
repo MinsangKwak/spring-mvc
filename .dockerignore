@@ -1,0 +1,11 @@
+.git
+.gradle
+build
+node_modules
+docs
+upload
+playwright-report
+test-results
+*.log
+.env
+.env.*
