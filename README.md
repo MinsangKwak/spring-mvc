@@ -6,7 +6,7 @@
 
 > 확인할 핵심: 요청 바인딩 6가지 · HTTP 메서드 4가지 · 응답 형식 비교 · HTML 렌더링 · 정상·오류 응답 검증
 
-[실습 가이드](docs/PRACTICE.md) · [개선 기록](docs/IMPROVEMENTS.md) · [배포 가이드](docs/DEPLOYMENT.md) · [화면 설계 기준](DESIGN.md)
+[실습 가이드](docs/PRACTICE.md) · [개선 기록](docs/IMPROVEMENTS.md) · [배포 가이드](docs/DEPLOYMENT.md) · [화면 설계 기준](docs/DESIGN.md)
 
 ## 실행 화면
 
@@ -100,10 +100,10 @@ Windows PowerShell에서는 다음 명령을 사용합니다.
 웹 화면까지 확인하려면 서버를 실행한 상태에서 별도 터미널에서 실행합니다. Node.js 22 이상을 권장합니다.
 
 ```bash
-npm ci
-npm run check:ui
-npx playwright install chromium
-npm run test:browser
+npm ci --prefix tools/ui
+npm --prefix tools/ui run check:ui
+npm --prefix tools/ui exec -- playwright install chromium
+npm --prefix tools/ui run test:browser
 ```
 
 브라우저 검증에는 요청 바인딩 6종, 메서드 4종, 응답 4종, 오류·연결 실패 복구, 모바일·키보드, Swagger UI의 JSON·폼 요청 실행을 포함합니다. 캡처는 `build/browser-screenshots/`에 생성합니다.
@@ -116,6 +116,6 @@ GitHub Actions는 `main` 변경과 PR에서 빌드·서버 테스트·UI 검사�
 - [ApiExceptionHandler](src/main/java/com/sparta/springmvc/error/ApiExceptionHandler.java): 오류 응답 형식 통일
 - [웹 실습 동작](src/main/resources/static/js/lab.js): 실제 요청 전송과 안전한 응답 출력
 - [서버 통합 테스트](src/test/java/com/sparta/springmvc/MvcLabIntegrationTest.java): 요청·응답 계약 검증
-- [브라우저 검증](scripts/browser-smoke.mjs): 화면에서 서버까지 이어지는 동작 확인
+- [브라우저 검증](tools/ui/browser-smoke.mjs): 화면에서 서버까지 이어지는 동작 확인
 
 세부 실습은 [실습 가이드](docs/PRACTICE.md), 원본과 개선 범위는 [개선 기록](docs/IMPROVEMENTS.md)에서 확인할 수 있습니다.

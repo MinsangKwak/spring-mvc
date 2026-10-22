@@ -3,8 +3,8 @@
   "private": true,
   "description": "웹 실습 화면 검증용 개발 도구. 서버 실행에는 Node.js가 필요하지 않습니다.",
   "scripts": {
-    "check:ui": "node scripts/check-ui.mjs",
-    "test:browser": "node scripts/browser-smoke.mjs"
+    "check:ui": "node check-ui.mjs",
+    "test:browser": "node browser-smoke.mjs"
   },
   "devDependencies": {"playwright": "1.58.2"}
 }

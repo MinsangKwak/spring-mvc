@@ -1,9 +1,11 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-const css = readFileSync('src/main/resources/static/css/lab.css', 'utf8');
-const design = readFileSync('DESIGN.md', 'utf8');
-const html = readFileSync('src/main/resources/templates/index.html', 'utf8');
-const js = readFileSync('src/main/resources/static/js/lab.js', 'utf8');
+const root = new URL('../../', import.meta.url);
+const readProject = (path) => readFileSync(new URL(path, root), 'utf8');
+const css = readProject('src/main/resources/static/css/lab.css');
+const design = readProject('docs/DESIGN.md');
+const html = readProject('src/main/resources/templates/index.html');
+const js = readProject('src/main/resources/static/js/lab.js');
 const colorBlock = design.split('colors:')[1].split('typography:')[0];
 for (const [, name, value] of colorBlock.matchAll(/  ([a-z-]+): "(#[a-f0-9]+)"/g)) {
     assert.ok(css.includes('--' + name + ': ' + value + ';'), '토큰 불일치: ' + name);

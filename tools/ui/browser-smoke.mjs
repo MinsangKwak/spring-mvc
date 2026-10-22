@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import { mkdir } from 'node:fs/promises';
+import { fileURLToPath } from 'node:url';
 const { chromium } = await import(process.env.PLAYWRIGHT_MODULE || 'playwright');
 const browser = await chromium.launch({
     headless: true,
@@ -7,7 +8,7 @@ const browser = await chromium.launch({
     args: ['--no-sandbox']
 });
 const base = process.env.LAB_URL || 'http://127.0.0.1:8080';
-const screenshots = process.env.LAB_SCREENSHOTS || 'build/browser-screenshots';
+const screenshots = process.env.LAB_SCREENSHOTS || fileURLToPath(new URL('../../build/browser-screenshots/', import.meta.url));
 await mkdir(screenshots, { recursive: true });
 const page = await browser.newPage({ viewport: { width: 1440, height: 1100 }, locale: 'ko-KR' });
 const errors = [];

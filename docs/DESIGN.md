@@ -47,7 +47,7 @@ components:
 
 한국어 화면과 영문 프로토콜 용어를 병기한다. 데스크톱 비교 작업을 우선하되 760px 이하에서는 요청과 응답을 세로로 배치한다. Swagger UI는 별도 도구이며 해당 제품의 기본 스타일과 조작 방식을 유지한다.
 
-CSS의 :root 변수가 실행 시 토큰의 원본이다. 이 문서는 같은 이름의 colors 키를 --키 CSS 변수에 대응한다. typography.body/code는 --font-body/code, rounded.DEFAULT는 --radius에 대응한다. 색상 변경 시 CSS와 이 문서를 함께 변경하고 scripts/check-ui.mjs로 차이를 검사한다.
+CSS의 :root 변수가 실행 시 토큰의 원본이다. 이 문서는 같은 이름의 colors 키를 --키 CSS 변수에 대응한다. typography.body/code는 --font-body/code, rounded.DEFAULT는 --radius에 대응한다. 색상 변경 시 CSS와 이 문서를 함께 변경하고 tools/ui/check-ui.mjs로 차이를 검사한다.
 
 ## Colors
 

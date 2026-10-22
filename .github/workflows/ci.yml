@@ -30,12 +30,13 @@ jobs:
         with:
           node-version: '22'
           cache: npm
+          cache-dependency-path: tools/ui/package-lock.json
       - name: Check UI contract
         run: |
-          npm ci --ignore-scripts
-          npm run check:ui
+          npm ci --prefix tools/ui --ignore-scripts
+          npm --prefix tools/ui run check:ui
       - name: Install browser
-        run: npx playwright install --with-deps chromium
+        run: npm --prefix tools/ui exec -- playwright install --with-deps chromium
       - name: Verify browser flow
         shell: bash
         run: |
@@ -46,7 +47,7 @@ jobs:
             curl -sf http://127.0.0.1:8080/ >/dev/null && break
             sleep 1
           done
-          npm run test:browser
+          npm --prefix tools/ui run test:browser
       - name: Verify deployment container
         shell: bash
         run: |
