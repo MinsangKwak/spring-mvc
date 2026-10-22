@@ -8,6 +8,25 @@
 
 [실습 가이드](docs/PRACTICE.md) · [개선 기록](docs/IMPROVEMENTS.md) · [배포 가이드](docs/DEPLOYMENT.md) · [화면 설계 기준](docs/DESIGN.md)
 
+## 설치 없이 체험하기
+
+[웹 실습 열기](https://spring-mvc-k14y.onrender.com/) · [Swagger UI에서 API 실행](https://spring-mvc-k14y.onrender.com/swagger-ui.html)
+
+무료 서버를 사용해 한동안 접속이 없으면 첫 화면이 열리기까지 50초 이상 걸릴 수 있습니다. 입력값은 DB에 저장하지 않습니다.
+
+## 저장소 둘러보기
+
+| 위치 | 담고 있는 내용 |
+|---|---|
+| [src](src/) | Spring MVC 실습 코드·웹 화면·서버 테스트 |
+| [docs](docs/) | 실습 순서·개선 기록·화면 설계·배포 방법 |
+| [tools/ui](tools/ui/) | UI 정적 검사와 Playwright 브라우저 검증 도구 |
+| [.github/workflows](.github/workflows/) | 빌드·서버·브라우저·Docker 자동 검증 |
+| [gradle/wrapper](gradle/wrapper/) | 같은 Gradle 버전을 실행하기 위한 Wrapper |
+| `Dockerfile` · `render.yaml` | 컨테이너 빌드와 Render 배포 설정 |
+
+처음 방문했다면 **웹 실습 → [실습 가이드](docs/PRACTICE.md) → [요청 처리 코드](src/main/java/com/sparta/springmvc/request/RequestController.java) → [통합 테스트](src/test/java/com/sparta/springmvc/MvcLabIntegrationTest.java)** 순서로 확인할 수 있습니다. 자세한 경로는 [폴더 구조 안내](docs/STRUCTURE.md)에 정리했습니다.
+
 ## 실행 화면
 
 이름과 나이를 입력하면 요청 URL·헤더·본문과 **실제 서버의 상태 코드·Content-Type·응답 본문**을 같은 화면에서 확인할 수 있습니다.

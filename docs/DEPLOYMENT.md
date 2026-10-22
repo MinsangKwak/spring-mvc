@@ -1,6 +1,8 @@
 # Render 배포
 
-저장소는 비공개로 유지하면서 실행 화면과 Swagger UI를 공개합니다. GitHub에서 코드·테스트·배포 설정을 관리하고 Render는 Spring Boot 실행을 담당합니다.
+코드 저장소의 공개 여부와 별개로 실행 화면과 Swagger UI를 웹에 공개합니다. GitHub에서 코드·테스트·배포 설정을 관리하고 Render는 Spring Boot 실행을 담당합니다.
+
+현재 배포 주소: [웹 실습](https://spring-mvc-k14y.onrender.com/) · [Swagger UI](https://spring-mvc-k14y.onrender.com/swagger-ui.html)
 
 ## 처음 배포하기
 
