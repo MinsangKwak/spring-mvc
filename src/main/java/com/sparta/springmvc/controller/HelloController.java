@@ -5,6 +5,9 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 
 import org.springframework.web.bind.annotation.*;
 
+/**
+ * HTTP 메서드별 라우팅 비교. 메서드 이름만 돌려주며 리소스를 생성·수정·삭제하지 않는다.
+ */
 @RestController
 @RequestMapping("/api")
 @Tag(name = "01 · HTTP 메서드", description = "HTTP 메서드별 라우팅을 비교합니다. 데이터 저장과 실제 CRUD는 수행하지 않습니다.")
