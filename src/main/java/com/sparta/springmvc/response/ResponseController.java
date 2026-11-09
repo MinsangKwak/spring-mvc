@@ -6,6 +6,9 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+/**
+ * {@code @Controller}에서 메서드마다 {@code @ResponseBody}를 붙여 문자열과 객체 응답의 Content-Type 차이를 비교한다.
+ */
 @Controller
 @RequestMapping("/response")
 @Tag(name = "03 · 응답 형식", description = "@Controller + @ResponseBody에서 문자열과 객체 응답을 비교합니다.")

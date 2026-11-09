@@ -15,6 +15,14 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
 import org.springframework.web.bind.annotation.*;
 
+/**
+ * 같은 이름·나이를 경로·쿼리·폼·JSON으로 받아 어떤 애노테이션이 어떻게 읽는지 비교하는 컨트롤러.
+ * <p>
+ * 개별 인자({@code @PathVariable}·{@code @RequestParam})는 클래스의 {@code @Validated}로 메서드 검증을,
+ * 객체 인자({@code @ModelAttribute}·{@code @RequestBody})는 {@code @Valid}로 Bean Validation을 거친다.
+ * 두 경로는 던지는 예외가 달라 {@link com.sparta.springmvc.error.ApiExceptionHandler}에서 서로 다른 분기를 탄다.
+ * 데이터를 저장하거나 변경하지 않는다.
+ */
 @Controller
 @Validated
 @RequestMapping("/hello/request")

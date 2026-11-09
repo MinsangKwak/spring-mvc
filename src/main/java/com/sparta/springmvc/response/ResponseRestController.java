@@ -5,6 +5,9 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 
 import org.springframework.web.bind.annotation.*;
 
+/**
+ * {@link ResponseController}와 같은 응답을 {@code @RestController}로 만들어 {@code @ResponseBody}가 클래스 전체에 적용됨을 보여준다.
+ */
 @RestController
 @RequestMapping("/response/rest")
 @Tag(name = "04 · RestController", description = "@RestController가 적용하는 @ResponseBody 동작을 비교합니다.")
