@@ -1,6 +1,6 @@
 # Spring MVC 실습 가이드
 
-웹 실습과 Swagger UI는 실행 중인 같은 서버에 요청합니다. 응답을 미리 만들어 보여주는 방식이 아닙니다. 먼저 README의 실행 방법으로 서버를 시작합니다.
+웹 실습과 Swagger UI는 실행 중인 같은 서버에 요청합니다. 응답을 미리 만들어 보여주는 방식이 아닙니다. 먼저 README의 실행 방법으로 서버를 시작합니다. 각 단계가 서버의 어느 지점에서 처리되는지는 [구조와 설계 지도](STRUCTURE.md)에 있습니다.
 
 ## 1. 요청 바인딩 비교
 
@@ -131,26 +131,35 @@ JSON에서는 `age`를 숫자로 보냅니다. 이 프로젝트는 숫자 문자
 
 API는 HTTP 메서드, 요청 바인딩, Controller 응답, RestController 응답 그룹으로 나눴습니다. HTML 렌더링은 웹 실습의 링크를 이용합니다.
 
-## 7. 테스트와 실행 문제 확인
+## 7. 문제가 생겼을 때
 
-```bash
-./gradlew clean build
-```
+빌드·브라우저 검증 명령은 README의 검증 방법을 따릅니다. HTML·API는 실제 Spring 컨텍스트와 MockMvc로 검증하고, Mockito를 사용하는 테스트가 없어 해당 의존성은 제외했습니다. 방문 횟수는 8개 스레드에서 200번 요청한 결과가 중복 없이 증가하는지 검사합니다.
 
-HTML·API는 실제 Spring 컨텍스트와 MockMvc로 검증합니다. Mockito를 사용하는 테스트가 없어 해당 의존성은 제외했습니다. 방문 횟수는 8개 스레드에서 200번 요청한 결과가 중복 없이 증가하는지 검사합니다.
-
-브라우저 검증은 README의 Node.js 명령을 사용합니다. `LAB_URL`로 서버 주소, `LAB_SCREENSHOTS`로 캡처 폴더, `CHROMIUM_PATH`로 브라우저 실행 파일을 지정할 수 있습니다. 기본값은 각각 `http://127.0.0.1:8080`, `build/browser-screenshots`, Playwright 기본 Chromium입니다.
+### 실행 환경 문제
 
 | 상황 | 확인할 항목 |
 |---|---|
 | `JAVA_HOME`·컴파일러 오류 | Java 17 JDK 설치 여부. JRE만으로는 빌드할 수 없음 |
 | 최초 의존성 다운로드 실패 | Maven Central·Gradle 배포 서버 연결 |
 | 8080 포트 사용 중 | 기존 서버를 종료하거나 `./gradlew bootRun --args='--server.port=8081'` 실행 |
-| 브라우저 연결 실패 | 서버 실행 여부와 브라우저 접속 주소 |
-| 오류 응답이 예상과 다름 | HTTP 메서드, Content-Type, 이름·나이 타입 |
+| 브라우저 연결 실패 | 서버 실행 여부와 `LAB_URL`(기본 `http://127.0.0.1:8080`). 캡처 폴더는 `LAB_SCREENSHOTS`, 브라우저 실행 파일은 `CHROMIUM_PATH` |
+| CI의 Playwright 설치 실패 | 러너 OS가 Playwright 지원 범위인지. 2026-11-09 `ubuntu-latest`(26.04)가 1.58.2에서 거부되어 `ubuntu-24.04`로 고정 |
+
+### 응답이 예상과 다를 때 보는 순서
+
+[STRUCTURE.md 3절](STRUCTURE.md#3-요청-한-건이-응답이-되기까지)의 단계 번호를 **앞에서부터** 확인합니다. 앞 단계에서 실패하면 뒤 단계는 실행조차 되지 않기 때문입니다.
+
+1. **상태 코드와 `code`를 읽어 실패한 단계를 정한다.** 404·405는 1단계(경로·메서드), 415·406은 2단계(Content-Type·Accept), `INVALID_REQUEST`는 3단계(객체 만들기), `INVALID_INPUT`은 4단계(검증), `INTERNAL_ERROR`는 5단계(핸들러 내부). 이것만으로 봐야 할 코드가 정해진다.
+2. **요청 미리보기와 실제 요청을 비교한다.** 웹 실습의 미리보기(메서드·URL·헤더·본문) 또는 Swagger의 curl을 그대로 터미널에서 실행해 화면 문제인지 서버 문제인지 가른다.
+3. **같은 입력을 다른 바인딩으로 보내 본다.** JSON에서만 실패하면 Jackson 설정, 폼에서만 실패하면 `DataBinder`·문자열 변환, 둘 다 실패하면 제약 자체.
+4. **`errors[]`가 비어 있으면 3단계 예외다.** `logging.level.org.springframework.web=DEBUG`로 `DispatcherServlet`이 고른 핸들러와 발생한 예외를 본다.
+5. **테스트로 재현해 고정한다.** `MvcLabIntegrationTest` 또는 `ErrorResponseContractTest`에 실패하는 요청을 한 줄 추가하고 고친 뒤 통과를 확인한다. 재현되지 않는 문제는 고쳤다고 말하지 않는다.
+6. **500이면 서버 로그를 본다.** `ApiExceptionHandler.unexpected()`가 `ERROR` 레벨로 스택 트레이스를 남긴다. 응답 본문에는 원인을 싣지 않는다.
 
 ## 참고 문서
 
 - [Spring MVC 컨트롤러 메서드](https://docs.spring.io/spring-framework/reference/web/webmvc/mvc-controller/ann-methods.html)
 - [Spring Boot 3.5 문서](https://docs.spring.io/spring-boot/3.5/reference/)
 - [springdoc-openapi 2.x](https://springdoc.org/v2/)
+
+[프로젝트 소개](../README.md) · [구조와 설계 지도](STRUCTURE.md) · [개선 기록](IMPROVEMENTS.md)
