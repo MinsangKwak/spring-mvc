@@ -1,6 +1,6 @@
 # Render 배포
 
-코드 저장소의 공개 여부와 별개로 실행 화면과 Swagger UI를 웹에 공개합니다. GitHub에서 코드·테스트·배포 설정을 관리하고 Render는 Spring Boot 실행을 담당합니다.
+Spring Boot 애플리케이션을 Render에서 실행해 웹 실습과 Swagger UI를 제공합니다. 코드·테스트·배포 설정은 GitHub에서 관리합니다.
 
 현재 배포 주소: [웹 실습](https://spring-mvc-k14y.onrender.com/) · [Swagger UI](https://spring-mvc-k14y.onrender.com/swagger-ui.html)
 
@@ -23,7 +23,7 @@ Render에서 GitHub 접근 권한을 연결하고 New → Web Service를 선택�
 
 Docker Command와 별도 빌드·시작 명령은 지정하지 않습니다. Dockerfile의 ENTRYPOINT로 실행합니다. DB·API 키·별도 환경변수 입력은 필요하지 않습니다.
 
-수동으로 Web Service를 생성한 경우 render.yaml이 대시보드 설정에 자동 적용되지는 않습니다. 표의 값을 직접 설정합니다. Blueprint로 생성할 때는 저장소 루트의 render.yaml을 사용합니다. 두 방식을 동시에 실행해 서비스를 중복 생성하지 않습니다.
+Web Service를 직접 생성할 때는 위 표에 따라 대시보드를 설정합니다. `render.yaml`은 자동 적용되지 않습니다. Blueprint로 생성할 때는 저장소 루트의 `render.yaml`을 사용합니다. 두 방식 중 하나를 선택해 서비스가 중복 생성되지 않도록 합니다.
 
 ## 컨테이너 구성
 

@@ -12,7 +12,7 @@
 
 [웹 실습 열기](https://spring-mvc-k14y.onrender.com/) · [Swagger UI에서 API 실행](https://spring-mvc-k14y.onrender.com/swagger-ui.html)
 
-무료 서버를 사용해 한동안 접속이 없으면 첫 화면이 열리기까지 50초 이상 걸릴 수 있습니다. 입력값은 DB에 저장하지 않습니다.
+무료 서버를 사용해 한동안 접속이 없으면 첫 화면이 열리기까지 대기 시간이 생길 수 있습니다. 입력값은 DB에 저장하지 않습니다.
 
 ## 실행 화면
 
@@ -57,28 +57,20 @@ Swagger UI에서 JSON 본문을 입력하고 실제 요청을 실행한 화면�
 
 ## 왜 이 기술인가
 
-작성자는 6년간 웹 퍼블리싱·프론트엔드를 해 왔습니다. 폼과 `fetch`로 데이터를 보내는 쪽은 익숙하지만, 그 데이터가 서버에서 **어느 단계에서 읽히고 어느 단계에서 거부되는지**는 서버 코드를 직접 써 보지 않으면 알 수 없었습니다.
+폼과 `fetch`로 보낸 데이터가 서버의 **어느 단계에서 읽히고 거부되는지**를 확인하기 위해 만든 예제입니다.
 
-Spring MVC를 고른 이유는 라우팅 → 바인딩 → 검증 → 예외 변환이 각각 다른 확장 지점으로 분리되어 있어 **실패한 단계를 예외 타입으로 구분할 수 있기 때문**입니다. "숫자를 보냈는데 400"이 Jackson 변환 실패인지, Bean Validation 위반인지, Content-Type 불일치인지를 코드로 재현하고 테스트로 고정하는 것이 목표입니다. 기능을 늘리는 대신 같은 데이터를 네 가지 방식으로 보내 결과를 비교하는 구조로 범위를 고정했습니다.
-
-| 알고 싶은 것 | 문서 |
-|---|---|
-| 핵심 DTO·필드, 요청이 응답이 되는 7단계, 무엇을 바꾸면 어디가 함께 바뀌는가 | [구조와 설계 지도](docs/STRUCTURE.md) |
-| 설계 결정의 대안과 감수한 비용, 원본에서 바꾼 이유 | [개선 기록](docs/IMPROVEMENTS.md) |
-| 응답이 예상과 다를 때 보는 순서, 실습 절차 | [실습 가이드](docs/PRACTICE.md) |
+Spring MVC는 라우팅·바인딩·검증·예외 처리가 구분되어 있어 요청이 실패한 지점을 추적하기에 적합합니다. 같은 400 응답도 Jackson 변환 실패와 Bean Validation 위반의 원인이 다릅니다. 경로·쿼리·폼·JSON으로 같은 데이터를 보내고, 정상 응답과 오류 응답의 차이를 코드와 테스트로 확인합니다.
 
 ## 저장소 둘러보기
 
 | 위치 | 담고 있는 내용 |
 |---|---|
 | [src](src/) | Spring MVC 실습 코드·웹 화면·서버 테스트 |
-| [docs](docs/) | [구조와 설계 지도](docs/STRUCTURE.md) · [실습 가이드](docs/PRACTICE.md) · [개선 기록](docs/IMPROVEMENTS.md) · [화면 설계 기준](docs/DESIGN.md) · [배포 가이드](docs/DEPLOYMENT.md) |
-| [tools/ui](tools/ui/) | UI 정적 검사(`check-ui.mjs`)와 Playwright 브라우저 검증(`browser-smoke.mjs`). 실행 방법은 아래 검증 방법 |
+| [docs](docs/) | 실습 절차·처리 구조·설계 판단·화면 기준·배포 방법 |
+| [tools/ui](tools/ui/) | UI 정적 검사(`check-ui.mjs`)와 Playwright 브라우저 검증(`browser-smoke.mjs`). 실행 명령은 [검증 방법](#검증-방법) 참조 |
 | [.github/workflows](.github/workflows/) | 빌드·서버·브라우저·Docker 자동 검증 |
 | [gradle/wrapper](gradle/wrapper/) | 같은 Gradle 버전을 실행하기 위한 Wrapper |
 | `Dockerfile` · `render.yaml` | 컨테이너 빌드와 Render 배포 설정 |
-
-처음 방문했다면 **웹 실습 → [실습 가이드](docs/PRACTICE.md) → [요청 처리 코드](src/main/java/com/sparta/springmvc/request/RequestController.java) → [통합 테스트](src/test/java/com/sparta/springmvc/MvcLabIntegrationTest.java)** 순서로 확인할 수 있습니다. 자세한 경로는 [구조와 설계 지도](docs/STRUCTURE.md)에 정리했습니다.
 
 ## 실행 방법
 
@@ -134,7 +126,7 @@ DB·회원·인증·실제 리소스 CRUD는 구현 범위에 포함하지 않�
 ./gradlew clean build
 ```
 
-서버 테스트 **44개**(테스트 메서드 18개, 매개변수 조합 포함)로 요청 바인딩, 입력 제약과 경계값, JSON 타입, 바인딩 실패와 검증 실패의 오류 형식 차이, 응답 형식, HTML·리다이렉트, OpenAPI 명세, 방문 횟수 동시성을 검증합니다. 개수는 2026-11-09 기준 테스트 파일에서 센 값이며, 실제 결과는 GitHub Actions에서 확인합니다.
+2026-11-09 기준 서버 테스트는 매개변수 조합을 포함해 **44건**입니다. 서버·브라우저별 검증 범위와 확인한 실행 기록은 [검증 근거](docs/IMPROVEMENTS.md#검증-근거)에 정리했습니다.
 
 웹 화면까지 확인하려면 서버를 실행한 상태에서 별도 터미널에서 실행합니다. Node.js 22 이상을 권장합니다.
 
@@ -145,17 +137,15 @@ npm --prefix tools/ui exec -- playwright install chromium
 npm --prefix tools/ui run test:browser
 ```
 
-브라우저 검증에는 요청 바인딩 6종, 메서드 4종, 응답 4종, 오류·연결 실패 복구, 모바일·키보드, Swagger UI의 JSON·폼 요청 실행을 포함합니다. 캡처는 `build/browser-screenshots/`에 생성합니다. 서버 주소·캡처 폴더·브라우저 경로는 `LAB_URL`·`LAB_SCREENSHOTS`·`CHROMIUM_PATH`로 바꿀 수 있습니다. 자동화 검증은 전체 접근성 적합성 심사를 대신하지 않습니다.
+브라우저 검증은 실행 중인 서버를 대상으로 하며, 캡처는 `build/browser-screenshots/`에 생성합니다. 서버 주소·캡처 폴더·브라우저 경로는 `LAB_URL`·`LAB_SCREENSHOTS`·`CHROMIUM_PATH`로 바꿀 수 있습니다. 자동화 검증은 전체 접근성 적합성 심사를 대신하지 않습니다.
 
-GitHub Actions는 `main` 변경과 PR에서 빌드·서버 테스트·UI 검사·브라우저 검증을 실행하도록 구성했습니다.
+GitHub Actions는 `main` 변경과 PR에서 빌드·서버 테스트·UI 검사·브라우저·Docker 검증을 실행하도록 구성했습니다.
 
 ## 코드 살펴보기
 
 - [RequestController](src/main/java/com/sparta/springmvc/request/RequestController.java): 요청 방식에 따른 바인딩 비교
 - [ApiExceptionHandler](src/main/java/com/sparta/springmvc/error/ApiExceptionHandler.java): 오류 응답 형식 통일
-- [ErrorResponseContractTest](src/test/java/com/sparta/springmvc/ErrorResponseContractTest.java): 바인딩 실패·검증 실패·미분류 예외의 응답 모양 고정
+- [ErrorResponseContractTest](src/test/java/com/sparta/springmvc/ErrorResponseContractTest.java): 바인딩 실패·검증 실패·분류되지 않은 예외의 오류 응답 형식 검증
 - [웹 실습 동작](src/main/resources/static/js/lab.js): 실제 요청 전송과 안전한 응답 출력
 - [서버 통합 테스트](src/test/java/com/sparta/springmvc/MvcLabIntegrationTest.java): 요청·응답 계약 검증
 - [브라우저 검증](tools/ui/browser-smoke.mjs): 화면에서 서버까지 이어지는 동작 확인
-
-세부 실습은 [실습 가이드](docs/PRACTICE.md), 처리 흐름과 변경 영향은 [구조와 설계 지도](docs/STRUCTURE.md), 설계 판단과 개선 범위는 [개선 기록](docs/IMPROVEMENTS.md)에서 확인할 수 있습니다.
