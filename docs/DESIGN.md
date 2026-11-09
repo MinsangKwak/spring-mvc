@@ -43,11 +43,11 @@ components:
 
 브라우저 개발자 도구의 네트워크 검사기를 참고한 한국어 학습 도구다. 경로·쿼리·폼·JSON으로 보낸 데이터를 실제 응답과 비교하며 요청 바인딩을 학습한다. 실제 서비스의 업무·인증 정책은 구현 범위에 포함하지 않는다.
 
-핵심은 왼쪽의 요청 설정과 오른쪽의 실제 응답을 같은 화면에서 비교하는 것이다. 서버 응답을 꾸며내거나 정적 예시를 실제 응답처럼 표시하지 않는다. 마케팅 배너, 장식 이미지, 애니메이션은 사용하지 않는다.
+왼쪽의 요청 설정과 오른쪽의 실제 서버 응답을 같은 화면에서 비교한다. 요청·응답에 집중할 수 있도록 배너, 장식 이미지, 애니메이션은 사용하지 않는다.
 
 한국어 화면과 영문 프로토콜 용어를 병기한다. 데스크톱 비교 작업을 우선하되 760px 이하에서는 요청과 응답을 세로로 배치한다. Swagger UI는 별도 도구이며 해당 제품의 기본 스타일과 조작 방식을 유지한다.
 
-CSS의 :root 변수가 실행 시 토큰의 원본이다. 이 문서는 같은 이름의 colors 키를 --키 CSS 변수에 대응한다. typography.body/code는 --font-body/code, rounded.DEFAULT는 --radius에 대응한다. 색상 변경 시 CSS와 이 문서를 함께 변경하고 tools/ui/check-ui.mjs로 차이를 검사한다.
+실행 화면은 CSS의 `:root` 변수를 사용한다. 이 문서의 `colors` 키는 같은 이름의 `--키` CSS 변수에 대응한다. `typography.body`·`typography.code`는 각각 `--font-body`·`--font-code`, `rounded.DEFAULT`는 `--radius`에 대응한다. 색상을 바꿀 때는 CSS와 이 문서를 함께 수정하고 `tools/ui/check-ui.mjs`로 값이 일치하는지 검사한다.
 
 ## Colors
 
@@ -73,18 +73,18 @@ CSS의 :root 변수가 실행 시 토큰의 원본이다. 이 문서는 같은 �
 
 요청 폼·전송 상태·응답 패널은 lab.js가 관리하는 단일 구현을 공유한다. HTML 응답 화면도 lab.css의 버튼·본문·패널 규칙을 사용한다.
 
-| Capability | Canonical owner | Source of truth | Allowed variants | Verification |
+| 기능 | 담당 파일·요소 | 기준 정보 | 적용 범위 | 확인 방법 |
 |---|---|---|---|---|
 | Form | index.html + lab.js | 서버 검증 제약 | 요청 바인딩·메서드·응답 비교 | MockMvc + 브라우저 실습 |
 | Select/Listbox | 기본 HTML select | index.html | 운영체제 기본 팝업 | 키보드·좁은 화면 |
 | Scrollbar | lab.css 전역 규칙 | :root 토큰 | 강제 색상 모드 | computed style |
-| Toast | response-message live region | lab.js | 대기·전송·성공·실패 | 브라우저 실습 |
+| 상태 안내 | response-message live region | lab.js | 대기·전송·성공·실패 | 브라우저 실습 |
 
-폼은 novalidate로 브라우저 팝업을 끄고 서버의 검증 결과를 필드에 연결한다. 필수값·범위·형식 오류는 응답 패널에 남기며 오류 필드에 aria-invalid와 안내 문구를 적용한다. 잘못된 요청을 관찰하는 도구이므로 클라이언트가 서버 검증 전에 오류 입력을 차단하지 않는다.
+폼의 `novalidate`로 브라우저 기본 검증을 건너뛰고 서버의 검증 결과를 필드에 연결한다. 필수값·범위·형식 오류는 응답 패널에 표시하고, 오류가 있는 필드에는 `aria-invalid`와 안내 문구를 적용한다. 잘못된 요청의 처리 결과를 확인할 수 있도록 오류 입력도 서버에 전송한다.
 
-전송 시 설정과 주제 변경을 잠가 중복 요청과 이전 응답 덮어쓰기를 막는다. 10초 시간 제한 후 재시도할 수 있다. 입력은 브라우저 저장소에 저장하지 않는다. 주제 변경 시 이전 응답을 초기화한다. 상태 안내는 role=status로 읽히며 결과 본문은 textContent로 출력한다.
+전송 시 설정과 주제 변경을 잠가 중복 요청과 이전 응답 덮어쓰기를 막는다. 10초 시간 제한 후 재시도할 수 있다. 입력은 브라우저 저장소에 저장하지 않는다. 주제 변경 시 이전 응답을 초기화한다. 상태 안내에는 `role="status"`를 적용하고 결과 본문은 `textContent`로 출력한다.
 
-기본 동작 이름은 요청 보내기, Swagger UI 열기, 실습 홈으로다. 클릭 대상은 버튼·링크를 사용하고 hover·focus·active·disabled 상태를 제공한다. 장식 아이콘 대신 텍스트와 방향 기호만 사용한다. 모션은 추가하지 않으며 reduced-motion을 존중한다.
+주요 버튼·링크 문구는 “요청 보내기”, “Swagger UI 열기”, “실습 홈으로”다. 클릭 대상은 버튼·링크를 사용하고 hover·focus·active·disabled 상태를 제공한다. 장식 아이콘 대신 텍스트와 방향 기호만 사용한다. 모션은 추가하지 않으며 reduced-motion을 존중한다.
 
 ## Do's and Don'ts
 
