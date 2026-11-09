@@ -14,7 +14,7 @@
 | `request/` | 경로·쿼리·폼·JSON 요청 바인딩과 DTO |
 | `response/` | Controller·RestController의 문자열·객체 응답 비교 |
 | `html/` | 정적 HTML·템플릿·모델·리다이렉트 예제 |
-| `error/` | 공통 오류 응답과 예외 처리 |
+| `error/` | 공통 오류 응답과 예외 처리. 단계별 분류는 [설계 지도](ARCHITECTURE.md) |
 
 요청·응답 예제의 `Star`는 각 실습에서 사용하는 별도 DTO입니다. 실제 도메인 모델이나 DB 엔티티가 아닙니다.
 
@@ -36,7 +36,7 @@
 
 | 위치 | 역할 |
 |---|---|
-| `src/test/java/com/sparta/springmvc/` | JUnit·MockMvc 서버 테스트 40개 |
+| `src/test/java/com/sparta/springmvc/` | JUnit·MockMvc 서버 테스트 44개 (2026-11-09 기준) |
 | `tools/ui/check-ui.mjs` | 디자인 토큰·레이블·안전한 출력 검사 |
 | `tools/ui/browser-smoke.mjs` | 실제 화면과 Swagger API 실행 검증 |
 | `tools/ui/package.json` · `package-lock.json` | 검증 도구의 명령과 의존성 버전 |

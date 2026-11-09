@@ -6,7 +6,7 @@
 
 > 확인할 핵심: 요청 바인딩 6가지 · HTTP 메서드 4가지 · 응답 형식 비교 · HTML 렌더링 · 정상·오류 응답 검증
 
-[실습 가이드](docs/PRACTICE.md) · [개선 기록](docs/IMPROVEMENTS.md) · [배포 가이드](docs/DEPLOYMENT.md) · [화면 설계 기준](docs/DESIGN.md)
+[실습 가이드](docs/PRACTICE.md) · [설계 지도](docs/ARCHITECTURE.md) · [개선 기록](docs/IMPROVEMENTS.md) · [배포 가이드](docs/DEPLOYMENT.md) · [화면 설계 기준](docs/DESIGN.md)
 
 ## 설치 없이 체험하기
 
@@ -55,6 +55,67 @@ Swagger UI에서 JSON 본문을 입력하고 실제 요청을 실행한 화면�
 
 </details>
 
+## 왜 이 기술인가
+
+작성자는 6년간 웹 퍼블리싱·프론트엔드를 해 왔습니다. 폼과 `fetch`로 데이터를 보내는 쪽은 익숙하지만, 그 데이터가 서버에서 **어느 단계에서 읽히고 어느 단계에서 거부되는지**는 서버 코드를 직접 써 보지 않으면 알 수 없었습니다.
+
+Spring MVC를 고른 이유는 라우팅 → 바인딩 → 검증 → 예외 변환이 각각 다른 확장 지점으로 분리되어 있어, **실패한 단계를 예외 타입으로 구분할 수 있기 때문**입니다. "숫자를 보냈는데 400"이 Jackson 변환 실패인지, Bean Validation 위반인지, Content-Type 불일치인지를 코드로 재현하고 테스트로 고정하는 것이 이 프로젝트의 목표입니다. 기능을 늘리는 대신 같은 데이터를 네 가지 방식으로 보내 결과를 비교하는 구조로 범위를 고정했습니다. 자세한 배경은 [설계 지도 1절](docs/ARCHITECTURE.md#1-왜-이-기술인가)에 있습니다.
+
+## 핵심 개념 지도
+
+DB 엔티티는 없고, 데이터는 요청·응답 DTO뿐입니다.
+
+| 타입 | 필드 | 역할 |
+|---|---|---|
+| `request.Star` | `name`(1~40자) · `age`(0~150, `Integer`) | 입력 DTO. 제약과 오류 문구의 원본 |
+| `BindingResponse` | `binding` · `name` · `age` | 성공 응답. `binding`은 값을 읽은 애노테이션 이름 |
+| `ApiError` | `code` · `message` · `errors[{field, message}]` | 모든 오류 응답의 단일 형식. 화면은 `field`로 입력칸을 찾음 |
+| `response.Star` | `name` · `age`(`int`) | 직렬화 비교용. 제약 없음 |
+
+요청 한 건은 다음 순서를 밟고, 앞 단계에서 실패하면 뒤 단계는 실행되지 않습니다.
+
+1. **라우팅** 경로·메서드 매칭 → 실패 시 404 `NOT_FOUND` · 405 `METHOD_NOT_ALLOWED`
+2. **미디어 타입** `consumes`·`produces` → 415 `UNSUPPORTED_MEDIA_TYPE` · 406 `NOT_ACCEPTABLE`
+3. **객체 만들기(바인딩)** JSON은 Jackson, 폼·쿼리는 `DataBinder`·`ConversionService` → 400 `INVALID_REQUEST` (객체가 없으므로 필드 정보가 없을 수 있음)
+4. **검증** `@Valid`·`@Validated` → 400 `INVALID_INPUT` + `errors[]` (객체가 있으므로 필드별 오류)
+5. **핸들러 실행** → 분류되지 않은 예외는 500 `INTERNAL_ERROR`
+6. **직렬화** `@ResponseBody` → 200 `BindingResponse`
+7. 1~5의 모든 예외는 `ApiExceptionHandler` 한 곳에서 `ApiError`로 바뀜
+
+같은 `age=abc`라도 `@RequestParam`은 3단계 예외라 `INVALID_REQUEST`, `@ModelAttribute`는 변환 실패를 `BindingResult`에 담아 4단계 예외로 던지므로 `INVALID_INPUT`입니다. 이 차이는 [ErrorResponseContractTest](src/test/java/com/sparta/springmvc/ErrorResponseContractTest.java)로 고정했습니다. 전체 표는 [설계 지도 2절](docs/ARCHITECTURE.md#2-핵심-개념-지도)에 있습니다.
+
+## 설계 트레이드오프
+
+| 결정 | 선택하지 않은 쪽 | 감수한 비용 |
+|---|---|---|
+| 요청 DTO·응답 DTO를 `request.Star`·`response.Star`로 분리 | 하나의 `Star` 공유 | 같은 이름 두 개, 10여 줄 중복. 대신 검증 제약이 응답 예제에 섞이지 않음 |
+| 오류 응답을 `ResponseEntityExceptionHandler` 상속 + `handleExceptionInternal` 한 곳에서 변환 | Boot 기본 `/error` 본문, 또는 예외마다 개별 핸들러 | 부모가 어떤 예외를 어떤 상태로 보내는지 알아야 함. 그 지도가 위 7단계 |
+| Jackson 자동 변환 끔(`"33"`·`33.5`·모르는 속성은 400) | 기본값(관대한 변환) | 클라이언트가 문자열 숫자를 보내면 실패. 폼과 JSON의 타입 차이를 보이는 것이 목적이라 선택 |
+| 방문 횟수를 인스턴스 메모리 `AtomicLong`으로 | DB·외부 캐시 | 재시작 시 초기화, 서버 간 공유 안 됨. 실행 장벽(DB 설치)을 만들지 않기 위해 선택 |
+
+각 결정의 이유는 [설계 지도 3절](docs/ARCHITECTURE.md#3-설계-트레이드오프)에 있습니다.
+
+## 변경 영향 범위
+
+| 바꾸려는 것 | 함께 바뀌는 곳 |
+|---|---|
+| 나이 범위·이름 길이 | `request/Star.java` · `RequestController`의 개별 인자 애노테이션(두 곳이 같아야 함) · `ApiExceptionHandler.constraints()` 문구 · `PRACTICE.md` 2절 · 경계값 테스트 · `browser-smoke.mjs` |
+| `ApiError` 필드 | `lab.js`의 `errors`·`field` 접근 · 테스트 jsonPath · `PRACTICE.md` 예시 (OpenAPI 스키마는 자동 반영) |
+| 오류 `code` 값 | `ApiExceptionHandler`의 두 switch · 문서 표 · 테스트의 `$.code` |
+| 실습 URL | `lab.js` URL 조립 · `springdoc.paths-to-match` · `browser-smoke.mjs` · `ci.yml`의 curl · 문서 표 |
+| 색상·간격 토큰 | `lab.css`의 `:root` · `DESIGN.md` frontmatter · `check-ui.mjs`가 둘의 일치를 검사 |
+
+`controller/`·`response/`·`html/`는 `request/`·`error/`와 코드로 연결되어 있지 않아 요청 바인딩 변경의 영향을 받지 않습니다. 전체 표는 [설계 지도 4절](docs/ARCHITECTURE.md#4-변경-영향-범위)에 있습니다.
+
+## 문제 추적 순서
+
+1. 상태 코드와 `code`를 읽어 실패한 단계를 정한다. 404·405는 1단계, 415·406은 2단계, `INVALID_REQUEST`는 3단계, `INVALID_INPUT`은 4단계, `INTERNAL_ERROR`는 5단계.
+2. 웹 실습의 요청 미리보기 또는 Swagger의 curl을 터미널에서 그대로 실행해 화면 문제와 서버 문제를 가른다.
+3. 같은 입력을 다른 바인딩으로 보내 본다. JSON만 실패하면 Jackson 설정, 폼만 실패하면 `DataBinder`, 둘 다면 제약 자체.
+4. `errors[]`가 비어 있으면 3단계 예외다. `logging.level.org.springframework.web=DEBUG`로 어떤 예외가 났는지 본다.
+5. 실패하는 요청을 테스트에 한 줄 추가해 재현한 뒤 고친다. 재현되지 않으면 고쳤다고 하지 않는다.
+6. 500이면 `ApiExceptionHandler.unexpected()`가 남긴 `ERROR` 로그의 스택 트레이스를 본다.
+
 ## 저장소 둘러보기
 
 | 위치 | 담고 있는 내용 |
@@ -96,7 +157,7 @@ Windows PowerShell에서는 다음 명령을 사용합니다.
 |---|---|---|
 | 요청 바인딩 | 경로 변수, 쿼리·폼 인자, 쿼리·폼 객체, JSON 객체 | 요청 위치와 Content-Type에 맞는 데이터 전달 |
 | 응답 비교 | 문자열·객체, Controller·RestController, 정적·동적 HTML | 응답 본문과 미디어 타입의 구분 |
-| 검증·오류 처리 | 이름·나이 제약, 공통 오류 형식, 400·404·405·415 응답 | 클라이언트가 해석할 수 있는 API 오류 설계 |
+| 검증·오류 처리 | 이름·나이 제약, 공통 오류 형식, 400·404·405·415·500 응답 | 클라이언트가 해석할 수 있는 API 오류 설계 |
 | 웹 실습 도구 | 요청 미리보기, 실제 응답, 오류 안내, 중복 전송 방지 | 프론트엔드와 서버의 연결 및 상태 처리 |
 | API 문서 | 실행 가능한 Swagger UI와 요청·응답 스키마 | 인터페이스 명세와 구현의 일치 |
 | 테스트·자동화 | JUnit·MockMvc, 브라우저 시나리오, GitHub Actions | 동작을 재현하고 변경 후에도 검증하는 과정 |
@@ -132,7 +193,7 @@ DB·회원·인증·실제 리소스 CRUD는 구현 범위에 포함하지 않�
 ./gradlew clean build
 ```
 
-서버 테스트 **40개**로 요청 바인딩, 입력 제약과 경계값, JSON 타입, 응답 형식, HTML·리다이렉트, OpenAPI 명세, 방문 횟수 동시성을 검증합니다.
+서버 테스트 **44개**(테스트 메서드 18개, 매개변수 조합 포함)로 요청 바인딩, 입력 제약과 경계값, JSON 타입, 바인딩 실패와 검증 실패의 오류 형식 차이, 응답 형식, HTML·리다이렉트, OpenAPI 명세, 방문 횟수 동시성을 검증합니다. 개수는 2026-11-09 기준 테스트 파일에서 센 값이며, 실제 결과는 GitHub Actions에서 확인합니다.
 
 웹 화면까지 확인하려면 서버를 실행한 상태에서 별도 터미널에서 실행합니다. Node.js 22 이상을 권장합니다.
 
@@ -151,8 +212,9 @@ GitHub Actions는 `main` 변경과 PR에서 빌드·서버 테스트·UI 검사�
 
 - [RequestController](src/main/java/com/sparta/springmvc/request/RequestController.java): 요청 방식에 따른 바인딩 비교
 - [ApiExceptionHandler](src/main/java/com/sparta/springmvc/error/ApiExceptionHandler.java): 오류 응답 형식 통일
+- [ErrorResponseContractTest](src/test/java/com/sparta/springmvc/ErrorResponseContractTest.java): 바인딩 실패·검증 실패·미분류 예외의 응답 모양 고정
 - [웹 실습 동작](src/main/resources/static/js/lab.js): 실제 요청 전송과 안전한 응답 출력
 - [서버 통합 테스트](src/test/java/com/sparta/springmvc/MvcLabIntegrationTest.java): 요청·응답 계약 검증
 - [브라우저 검증](tools/ui/browser-smoke.mjs): 화면에서 서버까지 이어지는 동작 확인
 
-세부 실습은 [실습 가이드](docs/PRACTICE.md), 원본과 개선 범위는 [개선 기록](docs/IMPROVEMENTS.md)에서 확인할 수 있습니다.
+세부 실습은 [실습 가이드](docs/PRACTICE.md), 설계 판단과 변경 영향은 [설계 지도](docs/ARCHITECTURE.md), 원본과 개선 범위는 [개선 기록](docs/IMPROVEMENTS.md)에서 확인할 수 있습니다.
