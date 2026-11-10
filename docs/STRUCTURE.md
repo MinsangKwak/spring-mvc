@@ -1,10 +1,10 @@
 # 구조와 설계 지도
 
-폴더 구조, 핵심 DTO, 요청 처리 흐름과 변경 영향 범위를 정리했습니다. 2026-11-09 기준 코드에 맞춰 설명합니다.
+폴더 구조와 핵심 DTO, 요청 처리 흐름, 변경 시 확인할 범위를 정리했습니다. 2026-11-09 기준 코드에 맞춰 설명합니다.
 
 ## 1. 폴더 구조
 
-루트에는 프로젝트 소개와 빌드·배포 진입점을 두고, 문서는 `docs`, 화면 검증 도구는 `tools/ui`, 애플리케이션은 `src`에서 관리합니다.
+저장소 루트에는 프로젝트 소개와 빌드·배포 설정을 두었습니다. 문서는 `docs`, 화면 검증 도구는 `tools/ui`, 애플리케이션 코드는 `src`에서 관리합니다.
 
 ### 서버 코드 · `src/main/java/com/sparta/springmvc/`
 
@@ -43,11 +43,11 @@
 | `Dockerfile` · `render.yaml` | 컨테이너 빌드와 Render 배포 설정 |
 | `.gitignore` · `.gitattributes` · `.dockerignore` | Git·Docker 기본 동작 |
 
-Node.js는 검증할 때만 필요하고 서버는 Gradle로 실행합니다. 검증 캡처와 로그는 `build/`에 생성하며 버전 관리에서 제외합니다. 문서용으로 선별한 화면만 `docs/images/`에 보관합니다.
+Node.js는 화면 검증에만 사용하며, 서버는 Gradle로 실행합니다. 검증 캡처와 로그는 `build/`에 생성하며 버전 관리에서 제외합니다. 문서용으로 선별한 화면만 `docs/images/`에 보관합니다.
 
 ## 2. 핵심 데이터
 
-DB 엔티티는 없습니다. 아래 타입은 요청·응답을 위한 DTO입니다.
+DB 엔티티는 사용하지 않습니다. 아래 타입은 요청과 응답을 표현하는 DTO입니다.
 
 | 타입 | 위치 | 필드 | 역할 |
 |---|---|---|---|
@@ -62,7 +62,7 @@ DB 엔티티는 없습니다. 아래 타입은 요청·응답을 위한 DTO입�
 
 ## 3. 요청 한 건이 응답이 되기까지
 
-`POST /hello/request/form/json`을 중심으로 다른 바인딩 방식과의 차이도 함께 정리했습니다. 1~6은 정상 응답의 처리 흐름입니다. 처리 중 예외가 발생하면 정상 흐름을 중단하고 7의 공통 오류 처리로 분기합니다.
+`POST /hello/request/form/json`을 기준으로 요청 처리 흐름을 설명하고, 다른 바인딩 방식과의 차이도 함께 정리했습니다. 1~6은 정상 응답의 처리 흐름입니다. 처리 중 예외가 발생하면 정상 흐름을 중단하고 7단계의 공통 오류 처리로 이동합니다.
 
 | # | 단계 | 담당 | 실패 시 예외 | 응답 `code` |
 |---|---|---|---|---|
@@ -78,7 +78,7 @@ JSON 문법·타입 오류는 `INVALID_REQUEST`와 빈 `errors[]`로 응답합�
 
 `@ModelAttribute`는 타입 변환 실패도 `BindingResult`에 담아 검증 오류와 함께 처리합니다. 따라서 같은 `age=abc`도 `@RequestParam`에서는 `INVALID_REQUEST`, `@ModelAttribute`에서는 `INVALID_INPUT`입니다. 이 차이는 `ErrorResponseContractTest.sameWrongAgeIsClassifiedByBindingStyle`에서 검증합니다.
 
-화면(`lab.js`)은 상태 코드·Content-Type·응답 본문을 표시합니다. 본문은 성공 여부와 관계없이 `textContent`로 출력합니다. 오류 응답의 `errors[]`에 `field`가 `name`·`age`인 항목이 있으면 해당 입력칸에 `aria-invalid`와 오류 문구를 적용합니다.
+화면(`lab.js`)에는 상태 코드와 Content-Type, 응답 본문을 표시합니다. 본문은 성공 여부와 관계없이 `textContent`로 출력합니다. 오류 응답의 `errors[]`에 `field`가 `name`·`age`인 항목이 있으면 해당 입력칸에 `aria-invalid`와 오류 문구를 적용합니다.
 
 ## 4. 변경 영향 범위
 
@@ -93,6 +93,6 @@ JSON 문법·타입 오류는 `INVALID_REQUEST`와 빈 `errors[]`로 응답합�
 | 색상·간격 토큰 | `lab.css`의 `:root` · `DESIGN.md` frontmatter · `check-ui.mjs`가 둘의 일치를 검사 |
 | Spring Boot 버전 | `build.gradle` · 부모 `ResponseEntityExceptionHandler`가 다루는 예외 목록이 바뀔 수 있으므로 `wrongContentTypeAndMethod`·`ErrorResponseContractTest` 결과를 먼저 확인 |
 
-요청 DTO·바인딩 변경은 주로 `request/`에 영향을 줍니다. 공통 예외 처리(`error/`)나 Jackson 설정을 바꾸면 `controller/`·`response/`·`html/`의 응답도 함께 확인합니다.
+요청 DTO나 바인딩 규칙을 바꾸면 주로 `request/`를 확인해야 합니다. 공통 예외 처리(`error/`)나 Jackson 설정을 바꾸면 `controller/`·`response/`·`html/`의 응답도 함께 확인합니다.
 
 [프로젝트 소개](../README.md) · [실습 가이드](PRACTICE.md) · [개선 기록](IMPROVEMENTS.md)
