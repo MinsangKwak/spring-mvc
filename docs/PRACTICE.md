@@ -1,6 +1,6 @@
 # Spring MVC 실습 가이드
 
-웹 실습과 Swagger UI는 같은 서버에 요청을 보내 실제 응답을 표시합니다. [README의 실행 방법](../README.md#실행-방법)에 따라 서버를 시작한 뒤 아래 예제를 실행합니다. 서버 내부의 처리 흐름은 [구조와 설계 지도](STRUCTURE.md)에서 확인할 수 있습니다.
+웹 실습과 Java Swagger는 같은 서버에 요청을 보내 실제 응답을 표시합니다. [README의 실행 방법](../README.md#실행-방법)에 따라 서버를 시작한 뒤 아래 예제를 실행합니다. 서버 내부의 처리 흐름은 [구조와 설계 지도](STRUCTURE.md)에서 확인할 수 있습니다.
 
 ## 1. 요청 바인딩 비교
 
@@ -124,9 +124,9 @@ JSON에서는 `age`를 숫자로 보냅니다. 이 프로젝트는 숫자 문자
 
 방문 횟수는 해당 애플리케이션 인스턴스가 처리한 `/html/dynamic` 요청의 누적값입니다. 사용자 수가 아니며 새로고침도 증가시킵니다. 재시작하면 초기화되고 여러 서버 간에는 공유되지 않습니다.
 
-## 6. Swagger UI 사용
+## 6. Java Swagger 사용
 
-1. `/swagger-ui.html`에서 실습 그룹을 펼칩니다.
+1. `/java-swagger`에서 실습 그룹을 펼칩니다.
 2. 실행할 API의 **Try it out**을 누릅니다.
 3. 파라미터·폼 값·JSON 본문을 입력합니다.
 4. **Execute**를 누르고 요청 URL, curl, 상태 코드, 응답 헤더·본문을 확인합니다.
@@ -135,7 +135,7 @@ API는 HTTP 메서드, 요청 바인딩, Controller 응답, RestController 응�
 
 ## 7. 문제가 생겼을 때
 
-실행 명령은 [README의 검증 방법](../README.md#검증-방법), 검증 범위와 실행 기록은 [개선 기록의 검증 근거](IMPROVEMENTS.md#검증-근거)에서 확인합니다.
+실행 명령은 [README의 검증 방법](../README.md#검증-방법), 자동 검증의 범위는 [현재 구현과 검증](IMPROVEMENTS.md#검증-범위)에서 확인합니다.
 
 ### 실행 환경 문제
 
@@ -145,7 +145,7 @@ API는 HTTP 메서드, 요청 바인딩, Controller 응답, RestController 응�
 | 최초 의존성 다운로드 실패 | Maven Central·Gradle 배포 서버 연결 |
 | 8080 포트 사용 중 | 기존 서버를 종료하거나 `./gradlew bootRun --args='--server.port=8081'` 실행 |
 | 브라우저 연결 실패 | 서버 실행 여부와 `LAB_URL`(기본 `http://127.0.0.1:8080`). 캡처 폴더는 `LAB_SCREENSHOTS`, 브라우저 실행 파일은 `CHROMIUM_PATH` |
-| CI의 Playwright 설치 실패 | 러너 OS가 Playwright 지원 범위인지. 2026-11-09 `ubuntu-latest`(26.04)가 1.58.2에서 거부되어 `ubuntu-24.04`로 고정 |
+| CI의 Playwright 설치 실패 | 러너 OS가 Playwright 지원 범위인지 확인. 현재 워크플로는 `ubuntu-24.04`에서 Chromium을 설치 |
 
 ### 응답이 예상과 다를 때 보는 순서
 
@@ -164,4 +164,4 @@ API는 HTTP 메서드, 요청 바인딩, Controller 응답, RestController 응�
 - [Spring Boot 3.5 문서](https://docs.spring.io/spring-boot/3.5/reference/)
 - [springdoc-openapi 2.x](https://springdoc.org/v2/)
 
-[프로젝트 소개](../README.md) · [구조와 설계 지도](STRUCTURE.md) · [개선 기록](IMPROVEMENTS.md)
+[프로젝트 소개](../README.md) · [구조와 설계 지도](STRUCTURE.md) · [현재 구현과 검증](IMPROVEMENTS.md)

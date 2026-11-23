@@ -1,8 +1,9 @@
 FROM eclipse-temurin:17-jdk-jammy AS build
 WORKDIR /workspace
-COPY gradlew settings.gradle build.gradle ./
+COPY gradlew settings.gradle ./
 COPY gradle ./gradle
-COPY src ./src
+COPY backend-java ./backend-java
+COPY frontend-thymeleaf/src/main/resources ./frontend-thymeleaf/src/main/resources
 RUN bash ./gradlew --no-daemon bootJar
 
 FROM eclipse-temurin:17-jre-jammy

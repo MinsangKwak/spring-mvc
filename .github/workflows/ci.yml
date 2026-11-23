@@ -30,13 +30,13 @@ jobs:
         with:
           node-version: '22'
           cache: npm
-          cache-dependency-path: tools/ui/package-lock.json
+          cache-dependency-path: frontend-thymeleaf/tools/ui/package-lock.json
       - name: Check UI contract
         run: |
-          npm ci --prefix tools/ui --ignore-scripts
-          npm --prefix tools/ui run check:ui
+          npm ci --prefix frontend-thymeleaf/tools/ui --ignore-scripts
+          npm --prefix frontend-thymeleaf/tools/ui run check:ui
       - name: Install browser
-        run: npm --prefix tools/ui exec -- playwright install --with-deps chromium
+        run: npm --prefix frontend-thymeleaf/tools/ui exec -- playwright install --with-deps chromium
       - name: Verify browser flow
         shell: bash
         run: |
@@ -47,7 +47,7 @@ jobs:
             curl -sf http://127.0.0.1:8080/ >/dev/null && break
             sleep 1
           done
-          npm --prefix tools/ui run test:browser
+          npm --prefix frontend-thymeleaf/tools/ui run test:browser
       - name: Verify deployment container
         shell: bash
         run: |
@@ -59,7 +59,11 @@ jobs:
             sleep 1
           done
           curl -fsS http://127.0.0.1:10000/api/hello
-          curl -fsS http://127.0.0.1:10000/swagger-ui/index.html >/dev/null
+          curl -fsS -D build/container-headers.txt -o /dev/null http://127.0.0.1:10000/
+          grep -Fi 'X-Frame-Options: DENY' build/container-headers.txt
+          grep -Fi "Content-Security-Policy: default-src 'self'" build/container-headers.txt
+          curl -fsS http://127.0.0.1:10000/java-swagger | grep -F 'Java Swagger' >/dev/null
+          test "$(curl -sS -o /dev/null -w '%{redirect_url}' http://127.0.0.1:10000/swagger-ui.html)" = "http://127.0.0.1:10000/java-swagger"
           curl -fsS http://127.0.0.1:10000/hello/request/form/json -H 'Content-Type: application/json' -d '{"name":"Demo","age":33}' > build/container-response.json
           node -e "const d=require('./build/container-response.json');if(d.name!=='Demo'||d.age!==33)process.exit(1)"
       - name: Upload verification evidence
@@ -73,4 +77,5 @@ jobs:
             build/browser-screenshots/
             build/server.log
             build/container.log
+            build/container-headers.txt
           retention-days: 14

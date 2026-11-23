@@ -1,151 +1,159 @@
-# Spring MVC · 요청과 응답 실습
+# Spring MVC Request Lab
 
-**프론트엔드에서 보낸 데이터를 서버가 어떻게 처리하고 응답하는지 직접 비교하는 학습 프로젝트입니다.**
+**Thymeleaf 화면에서 보낸 요청이 Spring MVC의 라우팅·바인딩·검증·예외 처리를 거쳐 어떤 HTTP 응답으로 돌아오는지 비교하는 풀스택 학습 프로젝트입니다.**
 
-2023년에 작성한 Spring MVC 기초 예제를 확장해 웹 실습 화면과 Swagger UI를 만들고, 입력 검증과 자동화 테스트를 보완했습니다.
+[웹 실습](https://spring-mvc-k14y.onrender.com/) · [Java Swagger](https://spring-mvc-k14y.onrender.com/java-swagger) · [상세 포트폴리오](https://www.notion.so/401cbbdd109b816ea6caeef336df0802)
 
-> 확인할 핵심: 요청 바인딩 6가지 · HTTP 메서드 4가지 · 응답 형식 비교 · HTML 렌더링 · 정상·오류 응답 검증
+무료 배포 환경은 비활동 시 정지할 수 있어 첫 접속이 늦을 수 있습니다. 입력값은 DB에 저장하지 않습니다.
 
-[실습 가이드](docs/PRACTICE.md) · [구조와 설계 지도](docs/STRUCTURE.md) · [개선 기록](docs/IMPROVEMENTS.md) · [배포 가이드](docs/DEPLOYMENT.md) · [화면 설계 기준](docs/DESIGN.md)
+## 기술과 담당 영역
 
-## 설치 없이 체험하기
+| 영역 | 위치 | 기술 | 구현 범위 |
+|---|---|---|---|
+| Backend · Java | `backend-java/` | Java 17, Spring Boot 3.5.16, Spring MVC, Bean Validation, Jackson, springdoc-openapi | 바인딩 6종, 요청·응답 DTO, 검증, 공통 오류 계약, MockMvc·JUnit 테스트 |
+| Frontend · Thymeleaf | `frontend-thymeleaf/` | Thymeleaf, HTML, CSS, JavaScript, Playwright | 요청 작성·미리보기, 응답 검사기, 반응형 화면, 키보드·상태 안내·필드 오류 처리 |
+| Build · Delivery | 저장소 루트 | Gradle Wrapper, GitHub Actions, Docker, Render | 빌드·서버·브라우저·512 MB 컨테이너 검증과 배포 설정 |
 
-[웹 실습 열기](https://spring-mvc-k14y.onrender.com/) · [Swagger UI에서 API 실행](https://spring-mvc-k14y.onrender.com/swagger-ui.html)
+프런트엔드는 React가 아니라 Spring이 제공하는 Thymeleaf 템플릿과 정적 자산입니다. Node.js는 UI 자동 검증에만 사용하고, 애플리케이션 실행은 Gradle이 담당합니다.
 
-무료 서버 특성상 한동안 접속이 없으면 첫 화면이 열리는 데 시간이 걸릴 수 있습니다. 입력값은 DB에 저장하지 않습니다.
+## 현재 구현
 
-## 실행 화면
-
-이름과 나이를 입력하면 요청 URL·헤더·본문을 확인하고, **서버가 반환한 상태 코드·Content-Type·응답 본문**과 한 화면에서 비교할 수 있습니다.
-
-![요청 설정과 실제 JSON 응답을 나란히 비교하는 웹 실습 화면](docs/images/lab-desktop.png)
-
-| 화면 영역 | 확인할 내용 |
+| 주제 | 확인할 수 있는 것 |
 |---|---|
-| 요청 설정 | 같은 이름·나이를 경로·쿼리·폼·JSON으로 전달 |
-| 요청 미리보기 | 전송할 URL·HTTP 메서드·헤더·본문 확인 |
-| 서버 응답 | 실제 상태 코드·Content-Type·본문과 필드 오류 비교 |
+| 요청 바인딩 | `@PathVariable`, `@RequestParam`, `@ModelAttribute`, `@RequestBody`의 입력 위치와 변환 차이 |
+| 검증과 오류 | 누락·범위·타입·JSON 문법·Content-Type 오류를 공통 `ApiError` 형식으로 분류 |
+| 응답 형식 | `@Controller`·`@RestController`, 문자열·객체의 반환 타입과 Content-Type 차이 |
+| HTML 응답 | 정적 HTML, Thymeleaf 모델, 인스턴스 메모리 카운터, 리다이렉트 |
+| 실행 화면 | 실제 요청 URL·헤더·본문 미리보기와 상태 코드·응답 헤더·본문 비교 |
+| API 문서 | `/java-swagger`의 Swagger UI에서 JSON·폼 요청을 실제 서버로 전송 |
 
-## 요청은 어떻게 처리되는가
+이 프로젝트는 MVC 요청 처리 학습에 집중합니다. DB, 인증, 영속 CRUD, 운영 트래픽 성능 측정은 구현 범위에 포함하지 않습니다.
 
-아래 그림은 **JSON 요청 한 건**의 처리 흐름을 보여 줍니다. 웹 실습과 Swagger UI는 서로 다른 화면에서 같은 API를 호출합니다.
+## 저장소 구조
 
-![웹 실습 또는 Swagger UI에서 보낸 JSON을 Spring MVC가 바인딩·검증하고 200 정상 응답 또는 400 오류 응답으로 반환하는 흐름](docs/images/request-response-flow.png)
+```text
+spring-mvc/
+├── backend-java/
+│   ├── build.gradle
+│   └── src/
+│       ├── main/
+│       │   ├── java/com/sparta/springmvc/
+│       │   └── resources/application*.properties
+│       └── test/java/com/sparta/springmvc/
+├── frontend-thymeleaf/
+│   ├── src/main/resources/
+│   │   ├── templates/
+│   │   └── static/
+│   └── tools/ui/
+├── docs/
+├── .github/workflows/ci.yml
+├── Dockerfile
+├── render.yaml
+├── settings.gradle
+└── gradlew
+```
 
-1. **보내기:** 이름·나이를 입력하고 JSON 요청을 전송합니다.
-2. **읽고 검증하기:** `@RequestBody`로 객체를 만들고 `@Valid`로 이름·나이 제약을 검사합니다.
-3. **비교하기:** 정상 입력은 `BindingResponse`, 제약 위반은 공통 `ApiError`로 돌아옵니다. 상태 코드와 본문을 화면에서 확인합니다.
+`settings.gradle`은 루트 프로젝트의 빌드 파일을 `backend-java/build.gradle`로 지정합니다. 빌드 파일은 백엔드 영역에 두되 `./gradlew`, `build/`, `build/libs/` 같은 루트 실행·산출물 경로는 유지합니다. Gradle의 `sourceSets`가 백엔드 설정과 프런트엔드 템플릿·정적 자산을 하나의 Spring Boot JAR로 묶습니다.
 
-JSON 문법·타입 오류는 객체를 읽는 단계에서도 발생할 수 있습니다. 위 그림은 정상 JSON과 입력 제약 위반을 비교한 대표 흐름이며, 쿼리·폼·경로 바인딩과 다른 HTTP 오류는 [실습 가이드](docs/PRACTICE.md)에서 확인할 수 있습니다. 수정 가능한 [도식 원본](docs/diagrams/request-response-flow.svg)도 함께 보관합니다.
+## 요청 처리 흐름
 
-<details>
-<summary>Swagger UI · 오류 응답 · 모바일 화면 보기</summary>
+1. `DispatcherServlet`이 경로·HTTP 메서드·미디어 타입을 판별합니다.
+2. Spring MVC가 경로, 쿼리, 폼 또는 JSON을 컨트롤러 인자와 DTO로 변환합니다.
+3. Bean Validation이 이름·나이 제약을 검사합니다.
+4. 컨트롤러가 `BindingResponse` 또는 비교용 응답을 반환합니다.
+5. 실패하면 `ApiExceptionHandler`가 상태 코드와 공통 `ApiError`로 변환합니다.
+6. 브라우저는 응답을 `textContent`로 출력하고 필드 오류를 입력 요소에 연결합니다.
 
-Swagger UI에서 JSON 본문을 입력하고 실제 요청을 실행한 화면입니다.
+바인딩 단계별 예외와 `code`는 [구조와 설계 지도](docs/STRUCTURE.md#3-요청-한-건이-응답이-되기까지)에 정리했습니다.
 
-![Swagger UI에서 JSON 요청을 실행한 결과](docs/images/swagger-ui.png)
+## 퍼블리싱과 접근성
 
-검증 오류는 응답 본문과 입력칸에 함께 표시합니다.
+- 입력 요소와 명시적 `label`, 오류 문구를 연결하고 서버 오류 시 `aria-invalid`를 적용합니다.
+- 전송 상태와 결과 안내에는 라이브 영역을 사용하며, 오류 필드에 포커스를 이동해 다음 행동을 알립니다.
+- 링크·버튼·기본 `select`를 용도에 맞게 사용하고 키보드 조작과 `:focus-visible` 상태를 유지합니다.
+- 760px 이하에서 요청·응답을 세로로 재배치하고 긴 URL·JSON이 화면 밖으로 넘치지 않게 처리합니다.
+- 강제 색상 모드와 `prefers-reduced-motion`을 고려하며, 상태는 색상만으로 구분하지 않습니다.
+- UI 정적 검사는 디자인 토큰, 레이블, 라이브 영역, 포커스 스타일, 안전한 텍스트 출력을 확인합니다. Playwright는 키보드·오류·모바일·API 흐름을 실제 브라우저에서 검사합니다.
 
-![잘못된 이름과 나이에 대한 400 응답 및 필드 오류 안내](docs/images/lab-validation.png)
+자동 검사는 구현 계약의 회귀를 찾기 위한 것이며 전체 웹 접근성 준수나 인증을 의미하지 않습니다.
 
-모바일에서는 요청·응답 패널을 세로로 배치합니다.
+## 프런트엔드·백엔드 방어
 
-<img src="docs/images/lab-mobile.png" width="375" alt="모바일 요청·응답 실습 화면">
+| 위협 | Backend · Java | Frontend · Thymeleaf | 검증 |
+|---|---|---|---|
+| 비정상 입력·파서 남용 | Bean Validation, 엄격한 Jackson 변환, JSON 본문·폼 16 KB와 문자열·숫자·중첩 제한 | 입력 안내와 서버 필드 오류 연결 | 경계값·타입·초과 JSON 계약 테스트 |
+| XSS·콘텐츠 삽입 | 사용자 입력을 JSON으로 직렬화하고 응답 타입을 고정 | 응답·오류를 `textContent`로 출력, Thymeleaf `th:text`, 앱 CSP | hostile HTML 입력의 DOM 미생성 브라우저 검사 |
+| 오류 정보 노출 | 고정된 `ApiError`, 500 내부 원인은 서버 로그에만 기록, 기본 오류의 메시지·스택 비공개 | 내부 예외 대신 고정 안내 표시 | 오류 응답 형식 테스트 |
+| 교차 출처·클릭재킹·캐시 | 다른 출처의 브라우저 응답 읽기를 허용하지 않고 `DENY`·`nosniff`·`no-store`·HTTPS HSTS 적용 | `connect-src 'self'`, `frame-ancestors 'none'`, 외부 스크립트 미사용 | 보안 헤더·hostile Origin 계약 테스트 |
+| 전달 헤더 변조 | OpenAPI 서버 URL을 상대 경로 `/`로 고정 | 같은 출처 `/v3/api-docs`만 로드 | 위조 `Forwarded`·`X-Forwarded-Host` 비반영 테스트 |
 
-</details>
-
-## 왜 이 기술인가
-
-폼과 `fetch`로 전송한 데이터가 서버의 **어느 단계에서 처리되거나 거부되는지** 확인하기 위해 만든 예제입니다.
-
-Spring MVC는 라우팅·바인딩·검증·예외 처리 단계가 나뉘어 있어 요청이 실패한 지점을 추적할 수 있습니다. 같은 400 응답도 Jackson 변환 실패와 Bean Validation 위반의 원인이 다릅니다. 경로·쿼리·폼·JSON으로 같은 데이터를 보내고, 정상 응답과 오류 응답의 차이를 코드와 테스트로 확인합니다.
-
-## 저장소 둘러보기
-
-| 위치 | 담고 있는 내용 |
-|---|---|
-| [src](src/) | Spring MVC 실습 코드·웹 화면·서버 테스트 |
-| [docs](docs/) | 실습 절차·처리 구조·설계 판단·화면 기준·배포 방법 |
-| [tools/ui](tools/ui/) | UI 정적 검사(`check-ui.mjs`)와 Playwright 브라우저 검증(`browser-smoke.mjs`). 실행 명령은 [검증 방법](#검증-방법) 참조 |
-| [.github/workflows](.github/workflows/) | 빌드·서버·브라우저·Docker 자동 검증 |
-| [gradle/wrapper](gradle/wrapper/) | 같은 Gradle 버전을 실행하기 위한 Wrapper |
-| `Dockerfile` · `render.yaml` | 컨테이너 빌드와 Render 배포 설정 |
+Swagger UI는 `/java-swagger` 주소를 유지하는 얇은 같은 출처 화면으로 제공합니다. 기능상 필요한 inline style만 이 경로의 CSP에서 허용하고, 스크립트는 같은 출처만 허용합니다. 기존 `/swagger-ui.html`은 호환 리다이렉트입니다. 상세한 범위와 남은 운영 경계는 [보안 설계와 검증](docs/SECURITY.md)에 정리했습니다.
 
 ## 실행 방법
 
-**JDK 17**이 필요합니다. DB 설치와 API 키는 필요하지 않으며, 처음 실행할 때 의존성을 다운로드합니다.
+필요 환경은 Java 17 JDK입니다. 저장소 루트에서 실행합니다.
 
 ```bash
 ./gradlew bootRun
 ```
 
-Windows PowerShell에서는 다음 명령을 사용합니다.
+Windows에서는 다음 명령을 사용합니다.
 
 ```powershell
 .\gradlew.bat bootRun
 ```
 
-| 화면 | 실행 후 접속 주소 |
-|---|---|
-| 웹 실습 | http://localhost:8080/ |
-| Swagger UI | http://localhost:8080/swagger-ui.html |
-| OpenAPI JSON | http://localhost:8080/v3/api-docs |
+기본 주소는 `http://localhost:8080/`입니다. 포트를 바꾸려면 다음처럼 실행합니다.
 
-웹 실습에서 요청 방식을 고른 다음 **요청 보내기**를 누릅니다. **오류값**을 넣어 400 응답을 확인하거나 Swagger UI의 **Try it out → Execute**로 같은 API를 실행할 수 있습니다.
-
-## 무엇을 구현했는가
-
-| 영역 | 구현 내용 | 실습 초점 |
-|---|---|---|
-| 요청 바인딩 | 경로 변수, 쿼리·폼 인자, 쿼리·폼 객체, JSON 객체 | 요청 위치와 Content-Type에 맞는 데이터 전달 |
-| 응답 비교 | 문자열·객체, Controller·RestController, 정적·동적 HTML | 응답 본문과 미디어 타입의 구분 |
-| 검증·오류 처리 | 이름·나이 제약, 공통 오류 형식, 400·404·405·415·500 응답 | 클라이언트가 해석할 수 있는 API 오류 설계 |
-| 웹 실습 도구 | 요청 미리보기, 실제 응답, 오류 안내, 중복 전송 방지 | 프론트엔드와 서버의 연결 및 상태 처리 |
-| API 문서 | 실행 가능한 Swagger UI와 요청·응답 스키마 | 인터페이스 명세와 구현의 일치 |
-| 테스트·자동화 | JUnit·MockMvc, 브라우저 시나리오, GitHub Actions | 동작을 재현하고 변경 후에도 검증하는 과정 |
-
-DB·회원·인증·실제 리소스 CRUD는 구현 범위에 포함하지 않습니다. POST·PUT·DELETE 예제는 메서드별 라우팅을 비교하며 데이터를 저장하거나 변경하지 않습니다. 2023년 원본 예제에서 무엇을 왜 바꿨는지는 [개선 기록](docs/IMPROVEMENTS.md)에 있습니다.
-
-## 기술 구성
-
-| 구분 | 기술 |
-|---|---|
-| 서버 | Java 17, Spring Boot 3.5.16, Spring MVC |
-| 화면 | Thymeleaf, HTML, CSS, JavaScript |
-| 데이터·검증 | Jackson, Jakarta Bean Validation |
-| API 문서 | springdoc-openapi 2.8.17, Swagger UI |
-| 빌드·테스트 | Gradle 8.14.3, JUnit 5, MockMvc, Playwright |
-| 자동화 | GitHub Actions |
-
-기존 Spring Boot 3 기반 학습 흐름을 이어갈 수 있도록 같은 메이저 버전 안에서 정비했습니다. Node.js는 화면 검증 도구를 실행할 때만 사용합니다.
+```bash
+./gradlew bootRun --args='--server.port=8081'
+```
 
 ## 검증 방법
+
+### 서버 빌드와 테스트
 
 ```bash
 ./gradlew clean build
 ```
 
-2026-11-09 기준 서버 테스트는 매개변수 조합을 포함해 **44건**입니다. 서버·브라우저별 검증 범위와 확인한 실행 기록은 [검증 근거](docs/IMPROVEMENTS.md#검증-근거)에 정리했습니다.
-
-웹 화면의 동작을 확인하려면 서버를 실행한 뒤 별도 터미널에서 아래 명령을 사용합니다. Node.js 22 이상을 권장합니다.
+### UI 정적 검사
 
 ```bash
-npm ci --prefix tools/ui
-npm --prefix tools/ui run check:ui
-npm --prefix tools/ui exec -- playwright install chromium
-npm --prefix tools/ui run test:browser
+npm ci --prefix frontend-thymeleaf/tools/ui
+npm --prefix frontend-thymeleaf/tools/ui run check:ui
 ```
 
-브라우저 검증은 실행 중인 서버를 대상으로 하며, 캡처는 `build/browser-screenshots/`에 생성합니다. 서버 주소·캡처 폴더·브라우저 경로는 `LAB_URL`·`LAB_SCREENSHOTS`·`CHROMIUM_PATH`로 바꿀 수 있습니다. 자동화 검증은 전체 접근성 적합성 심사를 대신하지 않습니다.
+### 브라우저 흐름 검사
 
-GitHub Actions는 `main` 변경과 PR에서 빌드·서버 테스트·UI 검사·브라우저·Docker 검증을 실행하도록 구성했습니다.
+서버를 먼저 실행한 뒤 Chromium을 설치하고 검사합니다.
 
-## 코드 살펴보기
+```bash
+npm --prefix frontend-thymeleaf/tools/ui exec -- playwright install chromium
+npm --prefix frontend-thymeleaf/tools/ui run test:browser
+```
 
-- [RequestController](src/main/java/com/sparta/springmvc/request/RequestController.java): 요청 방식에 따른 바인딩 비교
-- [ApiExceptionHandler](src/main/java/com/sparta/springmvc/error/ApiExceptionHandler.java): 오류 응답 형식 통일
-- [ErrorResponseContractTest](src/test/java/com/sparta/springmvc/ErrorResponseContractTest.java): 바인딩 실패·검증 실패·분류되지 않은 예외의 오류 응답 형식 검증
-- [웹 실습 동작](src/main/resources/static/js/lab.js): 실제 요청 전송과 안전한 응답 출력
-- [서버 통합 테스트](src/test/java/com/sparta/springmvc/MvcLabIntegrationTest.java): 요청·응답 계약 검증
-- [브라우저 검증](tools/ui/browser-smoke.mjs): 화면에서 서버까지 이어지는 동작 확인
+다른 서버 주소를 사용할 때는 `LAB_URL` 환경변수로 지정합니다. GitHub Actions는 빌드·서버 테스트·UI 정적 검사·브라우저 흐름·Docker 실행을 한 번에 검증하고 `build/` 아래의 결과를 아티팩트로 보관합니다.
+
+## 코드 지도
+
+| 목적 | 시작 파일 |
+|---|---|
+| 애플리케이션 시작 | `backend-java/src/main/java/com/sparta/springmvc/SpringMvcApplication.java` |
+| 바인딩 API | `backend-java/src/main/java/com/sparta/springmvc/request/RequestController.java` |
+| 공통 오류 계약 | `backend-java/src/main/java/com/sparta/springmvc/error/ApiExceptionHandler.java` |
+| Thymeleaf 실습 화면 | `frontend-thymeleaf/src/main/resources/templates/index.html` |
+| 요청 전송·응답 표시 | `frontend-thymeleaf/src/main/resources/static/js/lab.js` |
+| 반응형·상태 스타일 | `frontend-thymeleaf/src/main/resources/static/css/lab.css` |
+| 서버 계약 테스트 | `backend-java/src/test/java/com/sparta/springmvc/` |
+| UI 정적 검사 | `frontend-thymeleaf/tools/ui/check-ui.mjs` |
+| 브라우저 흐름 검사 | `frontend-thymeleaf/tools/ui/browser-smoke.mjs` |
+
+## 문서
+
+- [구조와 설계 지도](docs/STRUCTURE.md)
+- [실습 가이드](docs/PRACTICE.md)
+- [현재 구현과 검증](docs/IMPROVEMENTS.md)
+- [UI 디자인 기준](docs/DESIGN.md)
+- [보안 설계와 검증](docs/SECURITY.md)
+- [Render 배포](docs/DEPLOYMENT.md)
