@@ -4,7 +4,7 @@
     "../../frontend-thymeleaf/src/main/resources"
   ],
   "locale": "ko-KR",
-  "canonicalMap": "../DESIGN.md",
+  "canonicalMap": "../docs/design/guide.md",
   "requiredCapabilities": [
     "Form",
     "Select/Listbox",

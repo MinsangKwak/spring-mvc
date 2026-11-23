@@ -14,7 +14,7 @@ import static org.hamcrest.Matchers.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-// 오류가 발생한 단계에 따라 응답 형식이 달라지는 규칙을 고정한다. docs/STRUCTURE.md의 흐름 번호와 대응
+// 오류가 발생한 단계에 따라 응답 형식이 달라지는 규칙을 고정한다. project/docs/dev/architecture.md의 흐름 번호와 대응
 @SpringBootTest
 @AutoConfigureMockMvc
 class ErrorResponseContractTest {

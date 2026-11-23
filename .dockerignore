@@ -2,7 +2,7 @@
 .gradle
 build
 node_modules
-docs
+project
 upload
 playwright-report
 test-results
