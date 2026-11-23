@@ -5,7 +5,7 @@ const repositoryRoot = new URL('../../', import.meta.url);
 const readFrontend = (path) => readFileSync(new URL(path, frontendRoot), 'utf8');
 const readRepository = (path) => readFileSync(new URL(path, repositoryRoot), 'utf8');
 const css = readFrontend('src/main/resources/static/css/lab.css');
-const design = readRepository('docs/DESIGN.md');
+const design = readRepository('project/docs/design/guide.md');
 const html = readFrontend('src/main/resources/templates/index.html');
 const js = readFrontend('src/main/resources/static/js/lab.js');
 const swaggerHtml = readFrontend('src/main/resources/templates/java-swagger.html');

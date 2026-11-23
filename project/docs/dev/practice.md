@@ -1,6 +1,6 @@
 # Spring MVC 실습 가이드
 
-웹 실습과 Java Swagger는 같은 서버에 요청을 보내 실제 응답을 표시합니다. [README의 실행 방법](../README.md#실행-방법)에 따라 서버를 시작한 뒤 아래 예제를 실행합니다. 서버 내부의 처리 흐름은 [구조와 설계 지도](STRUCTURE.md)에서 확인할 수 있습니다.
+웹 실습과 Java Swagger는 같은 서버에 요청을 보내 실제 응답을 표시합니다. [README의 실행 방법](../../../README.md#실행)에 따라 서버를 시작한 뒤 아래 예제를 실행합니다. 서버 내부의 처리 흐름은 [구조와 설계 지도](architecture.md)에서 확인할 수 있습니다.
 
 ## 1. 요청 바인딩 비교
 
@@ -135,7 +135,18 @@ API는 HTTP 메서드, 요청 바인딩, Controller 응답, RestController 응�
 
 ## 7. 문제가 생겼을 때
 
-실행 명령은 [README의 검증 방법](../README.md#검증-방법), 자동 검증의 범위는 [현재 구현과 검증](IMPROVEMENTS.md#검증-범위)에서 확인합니다.
+실행 명령은 [README의 검증 방법](../../../README.md#검증), 전체 명령 지도는 [프로젝트 문서 안내](../README.md)에서 확인합니다.
+
+### 자동 검증 범위
+
+| 계층 | 도구·위치 | 확인 범위 |
+|---|---|---|
+| Java 단위·통합 | JUnit·MockMvc, `project/tests/backend-java/` | 라우팅, 바인딩 6종, 경계값, JSON 변환, 공통 오류, 응답 헤더, HTML 렌더링, 동시 증가 |
+| UI 정적 계약 | `project/tools/check-ui.mjs` | 디자인 토큰, 레이블, 필드 오류 요소, 라이브 영역, 포커스·모션 스타일, 안전한 출력 |
+| 브라우저 흐름 | `project/tests/frontend-thymeleaf/browser-smoke.mjs` | 정상·오류 입력, 키보드, 로딩·재시도, 모바일 배치, Swagger 요청 |
+| 배포 컨테이너 | Docker, curl | 512 MB 환경의 시작, 상태 경로, Swagger, JSON 바인딩 응답 |
+
+현재 검증 결과는 해당 커밋의 GitHub Actions와 아티팩트를 기준으로 확인합니다. 과거 커밋의 테스트 개수나 화면 캡처를 현재 품질 근거로 재사용하지 않습니다.
 
 ### 실행 환경 문제
 
@@ -149,7 +160,7 @@ API는 HTTP 메서드, 요청 바인딩, Controller 응답, RestController 응�
 
 ### 응답이 예상과 다를 때 보는 순서
 
-[요청 처리 흐름](STRUCTURE.md#3-요청-한-건이-응답이-되기까지)에 따라 라우팅·바인딩·검증 순서로 확인합니다. 처리 중 예외가 발생하면 정상 흐름을 중단하고 공통 오류 처리로 분기합니다.
+[요청 처리 흐름](architecture.md#4-요청-한-건이-응답이-되기까지)에 따라 라우팅·바인딩·검증 순서로 확인합니다. 처리 중 예외가 발생하면 정상 흐름을 중단하고 공통 오류 처리로 분기합니다.
 
 1. **상태 코드와 `code`로 확인 범위를 좁힙니다.** 404·405는 경로·메서드, 415·406은 Content-Type·Accept, `INVALID_REQUEST`는 입력 변환, `INVALID_INPUT`은 제약 위반이나 폼 객체의 바인딩 오류를 먼저 확인합니다. 500의 원인은 서버 로그에서 찾습니다.
 2. **요청 미리보기와 실제 요청을 비교합니다.** 웹 실습의 메서드·URL·헤더·본문과 브라우저 개발자 도구의 요청을 비교합니다. 같은 요청을 curl로 재현해 화면에서 전송한 내용과 서버 처리 결과를 구분합니다.
@@ -164,4 +175,4 @@ API는 HTTP 메서드, 요청 바인딩, Controller 응답, RestController 응�
 - [Spring Boot 3.5 문서](https://docs.spring.io/spring-boot/3.5/reference/)
 - [springdoc-openapi 2.x](https://springdoc.org/v2/)
 
-[프로젝트 소개](../README.md) · [구조와 설계 지도](STRUCTURE.md) · [현재 구현과 검증](IMPROVEMENTS.md)
+[프로젝트 소개](../../../README.md) · [문서 안내](../README.md) · [구조와 설계 지도](architecture.md)
