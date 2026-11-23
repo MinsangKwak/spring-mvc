@@ -45,9 +45,9 @@ components:
 
 왼쪽의 요청 설정과 오른쪽의 실제 서버 응답을 같은 화면에서 비교한다. 요청·응답에 집중할 수 있도록 배너, 장식 이미지, 애니메이션은 사용하지 않는다.
 
-한국어 화면과 영문 프로토콜 용어를 병기한다. 데스크톱 비교 작업을 우선하되 760px 이하에서는 요청과 응답을 세로로 배치한다. Swagger UI는 별도 도구이며 해당 제품의 기본 스타일과 조작 방식을 유지한다.
+한국어 화면과 영문 프로토콜 용어를 병기한다. 데스크톱 비교 작업을 우선하되 760px 이하에서는 요청과 응답을 세로로 배치한다. `/java-swagger`는 Swagger UI 자산을 사용하는 별도 도구이며 해당 제품의 기본 스타일과 조작 방식을 유지한다.
 
-실행 화면은 CSS의 `:root` 변수를 사용한다. 이 문서의 `colors` 키는 같은 이름의 `--키` CSS 변수에 대응한다. `typography.body`·`typography.code`는 각각 `--font-body`·`--font-code`, `rounded.DEFAULT`는 `--radius`에 대응한다. 색상을 바꿀 때는 CSS와 이 문서를 함께 수정하고 `tools/ui/check-ui.mjs`로 값이 일치하는지 검사한다.
+실행 화면은 CSS의 `:root` 변수를 사용한다. 이 문서의 `colors` 키는 같은 이름의 `--키` CSS 변수에 대응한다. `typography.body`·`typography.code`는 각각 `--font-body`·`--font-code`, `rounded.DEFAULT`는 `--radius`에 대응한다. 색상을 바꿀 때는 CSS와 이 문서를 함께 수정하고 `frontend-thymeleaf/tools/ui/check-ui.mjs`로 값이 일치하는지 검사한다.
 
 ## Colors
 
@@ -84,7 +84,7 @@ components:
 
 전송 시 설정과 주제 변경을 잠가 중복 요청과 이전 응답 덮어쓰기를 막는다. 10초 시간 제한 후 재시도할 수 있다. 입력은 브라우저 저장소에 저장하지 않는다. 주제 변경 시 이전 응답을 초기화한다. 상태 안내에는 `role="status"`를 적용하고 결과 본문은 `textContent`로 출력한다.
 
-주요 버튼·링크 문구는 “요청 보내기”, “Swagger UI 열기”, “실습 홈으로”다. 클릭 대상은 버튼·링크를 사용하고 hover·focus·active·disabled 상태를 제공한다. 장식 아이콘 대신 텍스트와 방향 기호만 사용한다. 모션은 추가하지 않으며 reduced-motion을 존중한다.
+주요 버튼·링크 문구는 “요청 보내기”, “Java Swagger 열기”, “실습 홈으로”다. 클릭 대상은 버튼·링크를 사용하고 hover·focus·active·disabled 상태를 제공한다. 장식 아이콘 대신 텍스트와 방향 기호만 사용한다. 모션은 추가하지 않으며 reduced-motion을 존중한다.
 
 ## Do's and Don'ts
 

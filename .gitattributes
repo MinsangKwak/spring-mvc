@@ -5,5 +5,5 @@
 *.css text eol=lf
 *.md text eol=lf
 gradlew text eol=lf
-gradlew.bat text eol=crlf
+gradlew.bat -text
 *.jar binary

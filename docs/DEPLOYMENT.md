@@ -1,8 +1,8 @@
 # Render 배포
 
-Spring Boot 애플리케이션을 Render에서 실행해 웹 실습과 Swagger UI를 제공합니다. 코드·테스트·배포 설정은 GitHub에서 관리합니다.
+Spring Boot 애플리케이션을 Render에서 실행해 웹 실습과 Java Swagger를 제공합니다. 코드·테스트·배포 설정은 GitHub에서 관리합니다.
 
-현재 배포 주소: [웹 실습](https://spring-mvc-k14y.onrender.com/) · [Swagger UI](https://spring-mvc-k14y.onrender.com/swagger-ui.html)
+현재 배포 주소: [웹 실습](https://spring-mvc-k14y.onrender.com/) · [Java Swagger](https://spring-mvc-k14y.onrender.com/java-swagger)
 
 ## 처음 배포하기
 
@@ -41,8 +41,8 @@ Render가 발급한 주소에서 다음 경로를 확인합니다.
 
 1. `/`: 웹 실습 화면
 2. `/api/hello`: 정상 인사 응답
-3. `/swagger-ui.html`: Swagger UI에서 JSON·폼 요청 실행
-4. `/v3/api-docs`: servers URL이 실제 HTTPS 주소인지 확인
+3. `/java-swagger`: 주소를 유지한 Swagger UI에서 JSON·폼 요청 실행
+4. `/v3/api-docs`: servers URL이 상대 경로 `/`로 고정되어 있는지 확인
 
 무료 인스턴스는 비활동 시 정지해 첫 접속에 대기 시간이 생길 수 있습니다.
 
@@ -53,7 +53,7 @@ docker build -t spring-mvc-lab .
 docker run --rm -p 10000:10000 -e PORT=10000 spring-mvc-lab
 ```
 
-서버 실행 후 `http://localhost:10000/`과 `http://localhost:10000/swagger-ui.html`을 확인합니다.
+서버 실행 후 `http://localhost:10000/`과 `http://localhost:10000/java-swagger`를 확인합니다. 기존 `/swagger-ui.html`은 새 경로로 리다이렉트합니다.
 
 ## 참고
 
