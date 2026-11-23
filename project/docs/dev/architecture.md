@@ -19,13 +19,13 @@
 | `ResponseEntityExceptionHandler`를 확장해 `ApiError`로 변환 | Spring 상태 분류를 활용하면서 일관된 오류 형식 제공 | Spring Boot 변경 시 상위 처리 규칙과 계약 테스트를 함께 확인 |
 | Jackson의 숫자 문자열·소수 변환과 알 수 없는 속성을 거부 | 폼 문자열 변환과 JSON 타입 검사의 차이를 명확히 학습 | 실제 서비스라면 기존 클라이언트 호환성 판단 필요 |
 | 방문 횟수를 인스턴스 `AtomicLong`으로 관리 | 저장소 없이 모델 전달과 공유 값 동시성에 집중 | 재시작 시 초기화되고 인스턴스 사이에 공유되지 않음 |
-| 실행 코드를 기술별 폴더로 나누고 루트 Gradle 프로젝트 유지 | 서버·화면 코드를 바로 찾으면서 실행·배포 명령 유지 | `settings.gradle`과 source set 연결 규칙 관리 필요 |
+| 실행 코드를 기술별 폴더로 나누고 Gradle 프로젝트를 백엔드에 배치 | 저장소 루트에는 역할 폴더만 두고 서버 실행 책임을 한곳에서 확인 | `backend-java/settings.gradle`과 source set 연결 규칙 관리 필요 |
 
 DB·인증·영속 CRUD와 운영 트래픽 성능 측정은 구현 범위에 포함하지 않습니다.
 
 ## 2. 폴더 구조
 
-저장소 루트에는 프로젝트 소개와 빌드·배포 진입점을 둡니다. Java 서버 코드는 `backend-java`, Thymeleaf 화면은 `frontend-thymeleaf`, 문서·테스트·검증 도구는 `project`에서 관리합니다.
+저장소 루트에는 프로젝트 소개와 역할별 폴더만 둡니다. Java 서버와 Gradle·Docker 실행 구성은 `backend-java`, Thymeleaf 화면은 `frontend-thymeleaf`, 문서·테스트·검증·배포 참고 설정은 `project`에서 관리합니다.
 
 ### 서버 코드 · `backend-java/src/main/java/com/sparta/springmvc/`
 
@@ -59,7 +59,7 @@ DB·인증·영속 CRUD와 운영 트래픽 성능 측정은 구현 범위에 �
 | `application.properties` | 로컬 기본 설정. Jackson 엄격 변환 옵션 포함 |
 | `application-render.properties` | Render 포트와 프록시 설정 |
 
-### 검증 도구와 루트 파일
+### 검증 도구와 실행 설정
 
 | 위치 | 역할 |
 |---|---|
@@ -70,11 +70,13 @@ DB·인증·영속 CRUD와 운영 트래픽 성능 측정은 구현 범위에 �
 | `project/package.json` · `project/package-lock.json` | UI 정적·브라우저 검증 명령과 의존성 버전 |
 | `.github/workflows/ci.yml` | 빌드부터 512 MB Docker 실행까지 자동 검증 |
 | `backend-java/build.gradle` | Java·테스트 의존성과 백엔드·프런트엔드 `sourceSets` 정의 |
-| `settings.gradle` · `gradlew` · `gradle/wrapper/` | 루트 빌드 진입점. `settings.gradle`이 백엔드 빌드 파일을 연결 |
-| `Dockerfile` · `render.yaml` | 컨테이너 빌드와 Render 배포 설정 |
-| `.gitignore` · `.gitattributes` · `.dockerignore` | Git·Docker 기본 동작 |
+| `backend-java/settings.gradle` · `backend-java/gradlew` · `backend-java/gradle/wrapper/` | 백엔드 Gradle 빌드 진입점 |
+| `backend-java/Dockerfile` · `backend-java/Dockerfile.dockerignore` | 저장소 루트를 컨텍스트로 사용하는 컨테이너 빌드 설정 |
+| `project/tools/render.yaml` | 새 Render Blueprint를 만들 때 참고하는 설정. 연결 서비스에는 자동 적용되지 않음 |
+| `project/.gitignore` · `project/tools/setup_git.py` | 저장소 공통 제외 규칙 원본과 로컬 적용 도구 |
+| 각 역할 폴더의 `.gitignore` · `.gitattributes` | 모듈별 산출물 제외와 줄바꿈 규칙 |
 
-`settings.gradle`은 `rootProject.buildFileName`을 `backend-java/build.gradle`로 지정합니다. 따라서 `./gradlew bootRun`·`./gradlew clean build`와 루트 `build/` 산출물 경로를 유지하면서, Gradle이 `backend-java/src/main`과 `frontend-thymeleaf/src/main/resources`를 하나의 JAR에 포함하고 `project/tests/backend-java/java`를 테스트 source set으로 실행합니다. Node.js는 화면 검증에만 사용합니다. 검증 캡처와 로그는 루트 `build/`에 생성하며 버전 관리에서 제외합니다.
+`backend-java/`가 Gradle 프로젝트 루트입니다. `./backend-java/gradlew -p backend-java bootRun`과 `./backend-java/gradlew -p backend-java clean build`로 실행하며, Gradle이 `backend-java/src/main`과 `frontend-thymeleaf/src/main/resources`를 하나의 JAR에 포함하고 `project/tests/backend-java/java`를 테스트 source set으로 실행합니다. Node.js는 화면 검증에만 사용합니다. JAR·테스트 보고서·브라우저 캡처와 로그는 `backend-java/build/`에 생성하며 버전 관리에서 제외합니다.
 
 화면은 Spring이 제공하는 Thymeleaf 템플릿과 정적 자산으로 구성합니다. 퍼블리싱·접근성 계약과 자동 검증 범위는 [UI·접근성 가이드](../design/guide.md)에서 관리합니다.
 

@@ -8,7 +8,8 @@
 - Java 테스트는 `project/tests/backend-java/java/`, 브라우저 테스트는 `project/tests/frontend-thymeleaf/`, 정적 검사 도구는 `project/tools/`에서 관리합니다.
 - 검증용 Node 의존성과 명령은 `project/package.json` 하나로 관리합니다. 기능별 중첩 `package.json`을 추가하지 않습니다.
 - Markdown은 루트 `README.md`와 기존 라이선스 파일을 제외하고 `project/docs/` 안에 둡니다. 중복 설명은 기존 문서에 합치고 별도 README를 늘리지 않습니다.
-- `settings.gradle`과 `backend-java/build.gradle`이 두 실행 영역과 `project/tests`를 연결합니다. 루트 `./gradlew` 명령, `build/libs/` 산출물과 루트 Docker 컨텍스트를 유지합니다.
+- `backend-java/settings.gradle`과 `backend-java/build.gradle`이 두 실행 영역과 `project/tests`를 연결합니다. Gradle Wrapper와 `build/libs/` 산출물은 `backend-java/`에 두고 Docker 빌드 컨텍스트는 저장소 루트를 사용합니다.
+- 저장소 공통 제외 규칙은 `project/.gitignore`가 원본이며, 첫 작업 전에 `python3 project/tools/setup_git.py`로 로컬 `.git/info/exclude`에 적용합니다.
 - 경로를 바꾸면 Gradle source set, npm script, CI 캐시·명령, 문서 링크와 Docker 제외 규칙을 함께 확인합니다.
 
 ## 구현·보안 범위
@@ -21,10 +22,10 @@
 
 ## 검증 기준
 
-- 서버·Java 변경: `./gradlew clean build`
+- 서버·Java 변경: `./backend-java/gradlew -p backend-java clean build`
 - 템플릿·CSS·JavaScript·디자인 토큰 변경: `npm --prefix project run check:ui`
 - 사용자 흐름·포커스·오류·Swagger 변경: 서버 실행 후 `npm --prefix project run test:browser`
-- 배포·Gradle·리소스 경로 변경: `docker build -t spring-mvc-lab .`과 대표 curl 계약 확인
+- 배포·Gradle·리소스 경로 변경: `docker build -f backend-java/Dockerfile -t spring-mvc-lab .`과 대표 curl 계약 확인
 - 경로 통합 변경: Java 테스트가 `NO-SOURCE`가 아니라 실제로 실행됐는지 테스트 보고서 수를 확인
 
 ## 작성 기준
