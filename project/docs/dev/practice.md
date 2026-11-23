@@ -154,7 +154,7 @@ API는 HTTP 메서드, 요청 바인딩, Controller 응답, RestController 응�
 |---|---|
 | `JAVA_HOME`·컴파일러 오류 | Java 17 JDK 설치 여부. JRE만으로는 빌드할 수 없음 |
 | 최초 의존성 다운로드 실패 | Maven Central·Gradle 배포 서버 연결 |
-| 8080 포트 사용 중 | 기존 서버를 종료하거나 `./gradlew bootRun --args='--server.port=8081'` 실행 |
+| 8080 포트 사용 중 | 기존 서버를 종료하거나 `./backend-java/gradlew -p backend-java bootRun --args='--server.port=8081'` 실행 |
 | 브라우저 연결 실패 | 서버 실행 여부와 `LAB_URL`(기본 `http://127.0.0.1:8080`). 캡처 폴더는 `LAB_SCREENSHOTS`, 브라우저 실행 파일은 `CHROMIUM_PATH` |
 | CI의 Playwright 설치 실패 | 러너 OS가 Playwright 지원 범위인지 확인. 현재 워크플로는 `ubuntu-24.04`에서 Chromium을 설치 |
 

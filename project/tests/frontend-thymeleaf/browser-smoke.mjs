@@ -8,7 +8,7 @@ const browser = await chromium.launch({
     args: ['--no-sandbox']
 });
 const base = process.env.LAB_URL || 'http://127.0.0.1:8080';
-const screenshots = process.env.LAB_SCREENSHOTS || fileURLToPath(new URL('../../../build/browser-screenshots/', import.meta.url));
+const screenshots = process.env.LAB_SCREENSHOTS || fileURLToPath(new URL('../../../backend-java/build/browser-screenshots/', import.meta.url));
 await mkdir(screenshots, { recursive: true });
 const page = await browser.newPage({ viewport: { width: 1440, height: 1100 }, locale: 'ko-KR' });
 const errors = [];

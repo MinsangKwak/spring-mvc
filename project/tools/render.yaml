@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: spring-mvc
+    runtime: docker
+    plan: free
+    region: singapore
+    branch: main
+    dockerfilePath: ./backend-java/Dockerfile
+    dockerContext: .
+    autoDeployTrigger: commit

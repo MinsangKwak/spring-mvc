@@ -1,0 +1,13 @@
+.git
+.github
+**/.gradle
+**/build
+**/node_modules
+project
+upload
+playwright-report
+test-results
+**/*.log
+**/.env
+**/.env.*
+**/HELP.md

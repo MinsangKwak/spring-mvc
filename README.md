@@ -14,14 +14,14 @@ Java 17, Spring Boot 3.5.16, Spring MVC, Thymeleaf, HTML, CSS, JavaScript를 사
 
 | 위치 | 담당하는 일 | 먼저 볼 구현·문서 |
 |---|---|---|
-| `backend-java/` | 바인딩 6종, Bean Validation, 공통 `ApiError`, 입력 제한과 OpenAPI 구성 | [`RequestController`](backend-java/src/main/java/com/sparta/springmvc/request/RequestController.java) · [구조와 요청 흐름](project/docs/dev/architecture.md) |
+| `backend-java/` | 바인딩 6종, Bean Validation, 공통 `ApiError`, 입력 제한, OpenAPI와 Gradle·Docker 실행 구성 | [`RequestController`](backend-java/src/main/java/com/sparta/springmvc/request/RequestController.java) · [구조와 요청 흐름](project/docs/dev/architecture.md) |
 | `frontend-thymeleaf/` | 요청 미리보기·응답 검사기, 반응형 레이아웃과 접근성 상태 | [`index.html`](frontend-thymeleaf/src/main/resources/templates/index.html) · [`lab.css`](frontend-thymeleaf/src/main/resources/static/css/lab.css) · [UI 기준](project/docs/design/guide.md) |
 | `.github/` | Gradle·UI·브라우저·Docker 자동 검증 | [`ci.yml`](.github/workflows/ci.yml) · [검증 범위](project/docs/dev/practice.md#자동-검증-범위) |
 | `project/docs/` | 구조·실습·디자인·보안·배포 근거 | [문서 안내](project/docs/README.md) |
 | `project/tests/` | JUnit·MockMvc 계약과 Playwright 사용자 흐름 | [Java 테스트](project/tests/backend-java/java/com/sparta/springmvc) · [브라우저 테스트](project/tests/frontend-thymeleaf/browser-smoke.mjs) |
-| `project/tools/` | 디자인 토큰·레이블·상태·안전한 출력 정적 검사 | [`check-ui.mjs`](project/tools/check-ui.mjs) · [UI 기준](project/docs/design/guide.md) |
+| `project/tools/` | UI 정적 검사와 Git 제외 규칙·Render 참고 설정 | [`check-ui.mjs`](project/tools/check-ui.mjs) · [배포 기준](project/docs/dev/deployment.md) |
 
-`settings.gradle`은 `backend-java/build.gradle`을 루트 빌드 파일로 사용합니다. Gradle source set이 실행 코드와 `project/tests/backend-java`를 연결하므로 `./gradlew`, `build/`, `build/libs/` 경로는 저장소 루트에 유지됩니다.
+Gradle 프로젝트와 Wrapper는 `backend-java/`에 있습니다. source set이 화면 자산과 `project/tests/backend-java`를 연결하며 JAR·테스트 보고서는 `backend-java/build/`에 생성됩니다.
 
 ## 직접 비교할 수 있는 것
 
@@ -37,18 +37,19 @@ DB, 인증, 영속 CRUD와 운영 트래픽 성능 측정은 학습 범위에 �
 
 ## 실행
 
-Java 17 JDK가 필요합니다. 저장소 루트에서 실행합니다.
+Java 17 JDK가 필요합니다. 저장소 루트에서 공통 제외 규칙을 한 번 적용한 뒤 실행합니다.
 
 ```bash
-./gradlew bootRun
+python3 project/tools/setup_git.py
+./backend-java/gradlew -p backend-java bootRun
 ```
 
-Windows에서는 `./gradlew` 대신 `.\gradlew.bat`을 사용합니다. 기본 주소는 `http://localhost:8080/`입니다.
+Windows에서는 첫 명령을 `py -3 project\tools\setup_git.py`, 두 번째 명령을 `.\backend-java\gradlew.bat -p backend-java bootRun`으로 실행합니다. 기본 주소는 `http://localhost:8080/`입니다.
 
 ## 검증
 
 ```bash
-./gradlew clean build
+./backend-java/gradlew -p backend-java clean build
 npm ci --prefix project --ignore-scripts
 npm --prefix project run check:ui
 ```
@@ -66,4 +67,4 @@ GitHub Actions는 Java 테스트 결과가 없으면 실패하며, UI 정적 검
 
 화면은 명시적 레이블, 필드 오류 연결, 라이브 상태 안내, 키보드 포커스, 좁은 화면 재배치와 안전한 `textContent` 출력을 사용합니다. 서버는 입력 크기·구조 제한, 공통 오류 응답, 같은 출처 CSP와 보안 헤더를 적용합니다. 자동 검사는 회귀 확인용이며 전체 웹 접근성 인증, 침투 테스트 또는 전체 공급망 SCA를 의미하지 않습니다.
 
-[UI 기준](project/docs/design/guide.md) · [실습 예제](project/docs/dev/practice.md) · [보안 설계](project/docs/dev/security.md) · [Render 배포](project/docs/dev/deployment.md)
+[UI 기준](project/docs/design/guide.md) · [실습 예제](project/docs/dev/practice.md) · [보안 설계](project/docs/dev/security.md) · [Render 배포 상태·전환 절차](project/docs/dev/deployment.md)

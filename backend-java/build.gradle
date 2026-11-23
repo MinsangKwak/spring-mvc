@@ -29,17 +29,17 @@ repositories {
 
 sourceSets {
     main {
-        java.srcDirs = ['backend-java/src/main/java']
+        java.srcDirs = ['src/main/java']
         resources {
             srcDirs = [
-                'backend-java/src/main/resources',
-                'frontend-thymeleaf/src/main/resources'
+                'src/main/resources',
+                '../frontend-thymeleaf/src/main/resources'
             ]
         }
     }
     test {
-        java.srcDirs = ['project/tests/backend-java/java']
-        resources.srcDirs = ['project/tests/backend-java/resources']
+        java.srcDirs = ['../project/tests/backend-java/java']
+        resources.srcDirs = ['../project/tests/backend-java/resources']
     }
 }
 

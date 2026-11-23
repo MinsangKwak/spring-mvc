@@ -4,26 +4,27 @@ Spring Boot 애플리케이션을 Render에서 실행해 웹 실습과 Java Swag
 
 현재 배포 주소: [웹 실습](https://spring-mvc-k14y.onrender.com/) · [Java Swagger](https://spring-mvc-k14y.onrender.com/java-swagger)
 
-## 처음 배포하기
+## 연결 서비스의 현재 설정
 
-Render에서 GitHub 접근 권한을 연결하고 New → Web Service를 선택합니다.
+2026-11-23에 Render에서 확인한 연결 서비스는 `MyWorkspace`의 `spring-mvc`입니다. 저장소 파일을 옮겨도 아래 Dashboard 설정은 자동으로 바뀌지 않습니다.
 
 | 설정 | 값 |
 |---|---|
 | Repository | MinsangKwak/spring-mvc |
-| Name | spring-mvc 또는 사용 가능한 이름 |
-| Language | Docker |
-| Branch | main |
-| Region | Singapore |
-| Root Directory | 비워두기 |
+| Name | spring-mvc |
+| Root Directory | 비워둠 |
+| Docker Context | . |
 | Dockerfile Path | ./Dockerfile |
-| Compute | Free · $0/month |
-| Health Check Path | /api/hello |
-| Auto-Deploy | After CI Checks Pass |
+| Auto-Deploy | 활성화 · Commit마다 배포 |
+| Health Check Path | 비워둠 · 플랫폼 기본 TCP 확인 |
+
+## 이 구조를 병합하기 전 변경
+
+연결 서비스의 Dockerfile Path를 `./backend-java/Dockerfile`로 저장한 뒤 이 구조를 `main`에 병합해야 합니다. Root Directory는 비워두고 Docker Context는 `.`을 유지합니다. 현재 저장소 변경만으로 이 Dashboard 값은 바뀌지 않습니다.
 
 Docker Command와 별도 빌드·시작 명령은 지정하지 않습니다. Dockerfile의 ENTRYPOINT로 실행합니다. DB·API 키·별도 환경변수 입력은 필요하지 않습니다.
 
-Web Service를 직접 생성할 때는 위 표에 따라 대시보드를 설정합니다. `render.yaml`은 자동 적용되지 않습니다. Blueprint로 생성할 때는 저장소 루트의 `render.yaml`을 사용합니다. 두 방식 중 하나를 선택해 서비스가 중복 생성되지 않도록 합니다.
+`project/tools/render.yaml`은 같은 구조로 새 Blueprint를 만들 때 참고하는 목표 설정입니다. 현재 연결 서비스에 자동 적용되지 않으며, 기존 서비스와 함께 Blueprint를 생성하면 서비스가 중복될 수 있습니다.
 
 ## 컨테이너 구성
 
@@ -49,7 +50,7 @@ Render가 발급한 주소에서 다음 경로를 확인합니다.
 ## 로컬에서 같은 설정 확인
 
 ```bash
-docker build -t spring-mvc-lab .
+docker build -f backend-java/Dockerfile -t spring-mvc-lab .
 docker run --rm -p 10000:10000 -e PORT=10000 spring-mvc-lab
 ```
 

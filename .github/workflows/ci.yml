@@ -19,6 +19,8 @@ jobs:
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
+      - name: Prepare repository ignores
+        run: python3 project/tools/setup_git.py
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
@@ -26,9 +28,9 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
       - name: Build and test
         run: |
-          ./gradlew --no-daemon clean build
-          test -n "$(find build/test-results/test -type f -name 'TEST-*.xml' -print -quit)"
-          grep -R -q '<testcase ' build/test-results/test
+          ./backend-java/gradlew -p backend-java --no-daemon clean build
+          test -n "$(find backend-java/build/test-results/test -type f -name 'TEST-*.xml' -print -quit)"
+          grep -R -q '<testcase ' backend-java/build/test-results/test
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
@@ -43,7 +45,7 @@ jobs:
       - name: Verify browser flow
         shell: bash
         run: |
-          java -jar build/libs/spring-mvc-1.0.0-SNAPSHOT.jar > build/server.log 2>&1 &
+          java -jar backend-java/build/libs/spring-mvc-1.0.0-SNAPSHOT.jar > backend-java/build/server.log 2>&1 &
           lab_server_pid=$!
           trap 'kill "$lab_server_pid" 2>/dev/null || true' EXIT
           for attempt in $(seq 1 30); do
@@ -54,31 +56,31 @@ jobs:
       - name: Verify deployment container
         shell: bash
         run: |
-          docker build -t spring-mvc-lab .
+          docker build -f backend-java/Dockerfile -t spring-mvc-lab .
           docker run -d --name mvc-render-check --memory=512m -p 10000:10000 -e PORT=10000 spring-mvc-lab
-          trap 'docker logs mvc-render-check > build/container.log 2>&1; docker rm -f mvc-render-check >/dev/null' EXIT
+          trap 'docker logs mvc-render-check > backend-java/build/container.log 2>&1; docker rm -f mvc-render-check >/dev/null' EXIT
           for attempt in $(seq 1 60); do
             curl -sf http://127.0.0.1:10000/api/hello >/dev/null && break
             sleep 1
           done
           curl -fsS http://127.0.0.1:10000/api/hello
-          curl -fsS -D build/container-headers.txt -o /dev/null http://127.0.0.1:10000/
-          grep -Fi 'X-Frame-Options: DENY' build/container-headers.txt
-          grep -Fi "Content-Security-Policy: default-src 'self'" build/container-headers.txt
+          curl -fsS -D backend-java/build/container-headers.txt -o /dev/null http://127.0.0.1:10000/
+          grep -Fi 'X-Frame-Options: DENY' backend-java/build/container-headers.txt
+          grep -Fi "Content-Security-Policy: default-src 'self'" backend-java/build/container-headers.txt
           curl -fsS http://127.0.0.1:10000/java-swagger | grep -F 'Java Swagger' >/dev/null
           test "$(curl -sS -o /dev/null -w '%{redirect_url}' http://127.0.0.1:10000/swagger-ui.html)" = "http://127.0.0.1:10000/java-swagger"
-          curl -fsS http://127.0.0.1:10000/hello/request/form/json -H 'Content-Type: application/json' -d '{"name":"Demo","age":33}' > build/container-response.json
-          node -e "const d=require('./build/container-response.json');if(d.name!=='Demo'||d.age!==33)process.exit(1)"
+          curl -fsS http://127.0.0.1:10000/hello/request/form/json -H 'Content-Type: application/json' -d '{"name":"Demo","age":33}' > backend-java/build/container-response.json
+          node -e "const d=require('./backend-java/build/container-response.json');if(d.name!=='Demo'||d.age!==33)process.exit(1)"
       - name: Upload verification evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: mvc-lab-verification
           path: |
-            build/reports/tests/test/
-            build/test-results/test/
-            build/browser-screenshots/
-            build/server.log
-            build/container.log
-            build/container-headers.txt
+            backend-java/build/reports/tests/test/
+            backend-java/build/test-results/test/
+            backend-java/build/browser-screenshots/
+            backend-java/build/server.log
+            backend-java/build/container.log
+            backend-java/build/container-headers.txt
           retention-days: 14
