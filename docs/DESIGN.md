@@ -47,7 +47,7 @@ components:
 
 한국어 화면과 영문 프로토콜 용어를 병기한다. 데스크톱 비교 작업을 우선하되 760px 이하에서는 요청과 응답을 세로로 배치한다. `/java-swagger`는 Swagger UI 자산을 사용하는 별도 도구이며 해당 제품의 기본 스타일과 조작 방식을 유지한다.
 
-실행 화면은 CSS의 `:root` 변수를 사용한다. 이 문서의 `colors` 키는 같은 이름의 `--키` CSS 변수에 대응한다. `typography.body`·`typography.code`는 각각 `--font-body`·`--font-code`, `rounded.DEFAULT`는 `--radius`에 대응한다. 색상을 바꿀 때는 CSS와 이 문서를 함께 수정하고 `frontend-thymeleaf/tools/ui/check-ui.mjs`로 값이 일치하는지 검사한다.
+실행 화면은 CSS의 `:root` 변수를 사용한다. 이 문서의 `colors` 키는 같은 이름의 `--키` CSS 변수에 대응한다. `typography.body`·`typography.code`는 각각 `--font-body`·`--font-code`, `rounded.DEFAULT`는 `--radius`에 대응한다. 색상을 바꿀 때는 CSS와 이 문서를 함께 수정하고 `docs/tools/check-ui.mjs`로 값이 일치하는지 검사한다.
 
 ## Colors
 

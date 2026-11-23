@@ -42,12 +42,12 @@ Try it out은 이 학습 앱의 핵심 기능이므로 유지합니다. 실행 �
 
 ## 의존성과 검증 범위
 
-- `npm audit --prefix frontend-thymeleaf/tools/ui --audit-level=high` 실행 결과는 0건입니다.
+- `npm audit --prefix docs --audit-level=high`로 검증용 Node 의존성의 high 이상 advisory를 확인합니다.
 - Spring Boot 3.5.16은 Spring Framework 6.2.19 이상을 사용합니다. Spring 공식 보안 공지에서 확인한 최근 조건부 이슈는 이 저장소에 없는 Actuator, Spring Security, Jersey, Cloud Foundry, WebFlux, FreeMarker 또는 해당 뷰 처리 구성이 필요해 현재 코드 경로와 일치하지 않았습니다.
 - Springdoc 2.8.17은 현재 사용 중인 Spring Boot 3.5 계열용 릴리스입니다.
-- 로컬 환경에서는 Gradle 배포판을 내려받을 수 없어 해결된 전체 JVM 의존성 그래프에 대한 advisory DB 스캔을 실행하지 못했습니다. 빌드·테스트·브라우저·Docker 검증은 GitHub Actions에서 수행하며, 의존성 알림은 GitHub dependency graph와 공식 Spring 공지를 함께 확인해야 합니다.
+- GitHub Actions는 Gradle 의존성을 해결해 빌드·테스트·브라우저·Docker 검증을 수행합니다. 별도 JVM advisory DB 스캐너는 구성하지 않았으므로 의존성 알림은 GitHub dependency graph와 공식 Spring 공지를 함께 확인해야 합니다.
 
-`SecurityContractTest`는 헤더, HSTS, CORS 비허용, 입력 제한, 전달 헤더 비반사, 새·구 Swagger 경로를 검증합니다. `JsonBodySizeFilterTest`는 Content-Length가 없는 입력의 16 KB 제한과 정상 본문 전달을 확인합니다. `browser-smoke.mjs`는 hostile HTML 입력이 DOM 노드가 되지 않는지와 `/java-swagger`에서 JSON·폼 요청이 실제 실행되는지를 확인합니다.
+`docs/tests/backend-java`의 `SecurityContractTest`는 헤더, HSTS, CORS 비허용, 입력 제한, 전달 헤더 비반사, 새·구 Swagger 경로를 검증합니다. `JsonBodySizeFilterTest`는 Content-Length가 없는 입력의 16 KB 제한과 정상 본문 전달을 확인합니다. `docs/tests/frontend-thymeleaf/browser-smoke.mjs`는 hostile HTML 입력이 DOM 노드가 되지 않는지와 `/java-swagger`에서 JSON·폼 요청이 실제 실행되는지를 확인합니다.
 
 ## 남은 운영 경계
 
@@ -60,4 +60,4 @@ Try it out은 이 학습 앱의 핵심 기능이므로 유지합니다. 실행 �
 - [springdoc 속성](https://springdoc.org/properties.html)
 - [Spring Security 응답 헤더 설명](https://docs.spring.io/spring-security/reference/servlet/exploits/headers.html)
 
-[프로젝트 소개](../README.md) · [구조와 설계 지도](STRUCTURE.md)
+[프로젝트 소개](../README.md) · [문서·검증 안내](README.md) · [구조와 설계 지도](STRUCTURE.md)

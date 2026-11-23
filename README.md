@@ -10,8 +10,9 @@
 
 | 영역 | 위치 | 기술 | 구현 범위 |
 |---|---|---|---|
-| Backend · Java | `backend-java/` | Java 17, Spring Boot 3.5.16, Spring MVC, Bean Validation, Jackson, springdoc-openapi | 바인딩 6종, 요청·응답 DTO, 검증, 공통 오류 계약, MockMvc·JUnit 테스트 |
-| Frontend · Thymeleaf | `frontend-thymeleaf/` | Thymeleaf, HTML, CSS, JavaScript, Playwright | 요청 작성·미리보기, 응답 검사기, 반응형 화면, 키보드·상태 안내·필드 오류 처리 |
+| Backend · Java | `backend-java/` | Java 17, Spring Boot 3.5.16, Spring MVC, Bean Validation, Jackson, springdoc-openapi | 바인딩 6종, 요청·응답 DTO, 검증, 공통 오류 계약 |
+| Frontend · Thymeleaf | `frontend-thymeleaf/` | Thymeleaf, HTML, CSS, JavaScript | 요청 작성·미리보기, 응답 검사기, 반응형 화면, 키보드·상태 안내·필드 오류 처리 |
+| Tests · Tools · Docs | `docs/` | JUnit, MockMvc, Playwright, Node.js | 서버·화면 계약 테스트, 정적 검사, 기술·보안·배포 문서 |
 | Build · Delivery | 저장소 루트 | Gradle Wrapper, GitHub Actions, Docker, Render | 빌드·서버·브라우저·512 MB 컨테이너 검증과 배포 설정 |
 
 프런트엔드는 React가 아니라 Spring이 제공하는 Thymeleaf 템플릿과 정적 자산입니다. Node.js는 UI 자동 검증에만 사용하고, 애플리케이션 실행은 Gradle이 담당합니다.
@@ -35,17 +36,20 @@
 spring-mvc/
 ├── backend-java/
 │   ├── build.gradle
-│   └── src/
-│       ├── main/
-│       │   ├── java/com/sparta/springmvc/
-│       │   └── resources/application*.properties
-│       └── test/java/com/sparta/springmvc/
+│   └── src/main/
+│       ├── java/com/sparta/springmvc/
+│       └── resources/application*.properties
 ├── frontend-thymeleaf/
-│   ├── src/main/resources/
-│   │   ├── templates/
-│   │   └── static/
-│   └── tools/ui/
+│   └── src/main/resources/
+│       ├── templates/
+│       └── static/
 ├── docs/
+│   ├── tests/
+│   │   ├── backend-java/java/com/sparta/springmvc/
+│   │   └── frontend-thymeleaf/
+│   ├── tools/
+│   ├── package.json
+│   └── README.md
 ├── .github/workflows/ci.yml
 ├── Dockerfile
 ├── render.yaml
@@ -53,7 +57,7 @@ spring-mvc/
 └── gradlew
 ```
 
-`settings.gradle`은 루트 프로젝트의 빌드 파일을 `backend-java/build.gradle`로 지정합니다. 빌드 파일은 백엔드 영역에 두되 `./gradlew`, `build/`, `build/libs/` 같은 루트 실행·산출물 경로는 유지합니다. Gradle의 `sourceSets`가 백엔드 설정과 프런트엔드 템플릿·정적 자산을 하나의 Spring Boot JAR로 묶습니다.
+`settings.gradle`은 루트 프로젝트의 빌드 파일을 `backend-java/build.gradle`로 지정합니다. 빌드 파일은 백엔드 영역에 두되 `./gradlew`, `build/`, `build/libs/` 같은 루트 실행·산출물 경로는 유지합니다. Gradle의 `sourceSets`가 백엔드 설정, 프런트엔드 템플릿·정적 자산과 `docs/tests/backend-java`의 테스트를 연결합니다. 실행 JAR에는 제품 코드와 화면 자산만 포함됩니다.
 
 ## 요청 처리 흐름
 
@@ -120,8 +124,8 @@ Windows에서는 다음 명령을 사용합니다.
 ### UI 정적 검사
 
 ```bash
-npm ci --prefix frontend-thymeleaf/tools/ui
-npm --prefix frontend-thymeleaf/tools/ui run check:ui
+npm ci --prefix docs --ignore-scripts
+npm --prefix docs run check:ui
 ```
 
 ### 브라우저 흐름 검사
@@ -129,8 +133,8 @@ npm --prefix frontend-thymeleaf/tools/ui run check:ui
 서버를 먼저 실행한 뒤 Chromium을 설치하고 검사합니다.
 
 ```bash
-npm --prefix frontend-thymeleaf/tools/ui exec -- playwright install chromium
-npm --prefix frontend-thymeleaf/tools/ui run test:browser
+npm --prefix docs exec -- playwright install chromium
+npm --prefix docs run test:browser
 ```
 
 다른 서버 주소를 사용할 때는 `LAB_URL` 환경변수로 지정합니다. GitHub Actions는 빌드·서버 테스트·UI 정적 검사·브라우저 흐름·Docker 실행을 한 번에 검증하고 `build/` 아래의 결과를 아티팩트로 보관합니다.
@@ -145,12 +149,13 @@ npm --prefix frontend-thymeleaf/tools/ui run test:browser
 | Thymeleaf 실습 화면 | `frontend-thymeleaf/src/main/resources/templates/index.html` |
 | 요청 전송·응답 표시 | `frontend-thymeleaf/src/main/resources/static/js/lab.js` |
 | 반응형·상태 스타일 | `frontend-thymeleaf/src/main/resources/static/css/lab.css` |
-| 서버 계약 테스트 | `backend-java/src/test/java/com/sparta/springmvc/` |
-| UI 정적 검사 | `frontend-thymeleaf/tools/ui/check-ui.mjs` |
-| 브라우저 흐름 검사 | `frontend-thymeleaf/tools/ui/browser-smoke.mjs` |
+| 서버 계약 테스트 | `docs/tests/backend-java/java/com/sparta/springmvc/` |
+| UI 정적 검사 | `docs/tools/check-ui.mjs` |
+| 브라우저 흐름 검사 | `docs/tests/frontend-thymeleaf/browser-smoke.mjs` |
 
 ## 문서
 
+- [문서·검증 안내](docs/README.md)
 - [구조와 설계 지도](docs/STRUCTURE.md)
 - [실습 가이드](docs/PRACTICE.md)
 - [현재 구현과 검증](docs/IMPROVEMENTS.md)

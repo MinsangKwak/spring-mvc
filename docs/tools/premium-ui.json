@@ -1,10 +1,10 @@
 {
   "profile": "product-admin",
   "sourceRoots": [
-    "../../src/main/resources"
+    "../../frontend-thymeleaf/src/main/resources"
   ],
   "locale": "ko-KR",
-  "canonicalMap": "../../../docs/DESIGN.md",
+  "canonicalMap": "../DESIGN.md",
   "requiredCapabilities": [
     "Form",
     "Select/Listbox",

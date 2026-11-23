@@ -41,8 +41,8 @@
 | 계층 | 도구 | 확인 범위 |
 |---|---|---|
 | Java 단위·통합 | JUnit, MockMvc | 라우팅, 바인딩 6종, 경계값, JSON 변환, 공통 오류, 응답 헤더, HTML 렌더링, 동시 증가 |
-| UI 정적 계약 | `frontend-thymeleaf/tools/ui/check-ui.mjs` | 디자인 토큰, 레이블, 필드 오류 요소, 라이브 영역, 포커스·모션 스타일, 안전한 출력 |
-| 브라우저 흐름 | `frontend-thymeleaf/tools/ui/browser-smoke.mjs` | 정상·오류 입력, 키보드, 로딩·재시도, 모바일 배치, Swagger 요청 |
+| UI 정적 계약 | `docs/tools/check-ui.mjs` | 디자인 토큰, 레이블, 필드 오류 요소, 라이브 영역, 포커스·모션 스타일, 안전한 출력 |
+| 브라우저 흐름 | `docs/tests/frontend-thymeleaf/browser-smoke.mjs` | 정상·오류 입력, 키보드, 로딩·재시도, 모바일 배치, Swagger 요청 |
 | 배포 컨테이너 | Docker, curl | 512 MB 환경의 시작, 상태 경로, Swagger, JSON 바인딩 응답 |
 
 현재 브랜치의 검증 결과는 해당 커밋의 GitHub Actions 실행과 아티팩트를 기준으로 확인합니다. 문서에는 과거 커밋의 테스트 개수나 화면 캡처를 현재 성능·품질 근거로 재사용하지 않습니다.
@@ -53,15 +53,15 @@
 
 ```bash
 ./gradlew clean build
-npm ci --prefix frontend-thymeleaf/tools/ui
-npm --prefix frontend-thymeleaf/tools/ui run check:ui
+npm ci --prefix docs --ignore-scripts
+npm --prefix docs run check:ui
 ```
 
 브라우저 검사는 서버 실행 후 수행합니다.
 
 ```bash
-npm --prefix frontend-thymeleaf/tools/ui exec -- playwright install chromium
-npm --prefix frontend-thymeleaf/tools/ui run test:browser
+npm --prefix docs exec -- playwright install chromium
+npm --prefix docs run test:browser
 ```
 
 GitHub Actions는 동일한 루트 Gradle 명령으로 JAR을 생성하고, 브라우저 검증 후 루트 Dockerfile로 컨테이너를 확인합니다. 산출물과 로그는 `build/` 아래에 생성됩니다.
@@ -70,4 +70,4 @@ GitHub Actions는 동일한 루트 Gradle 명령으로 JAR을 생성하고, 브�
 
 요청·응답 계약, 입력 검증, 오류 처리, API 명세와 실제 요청의 일치, 화면과 서버를 연결한 검증을 다룹니다. DB·인증·영속 CRUD와 운영 환경 성능 검증은 포함하지 않습니다.
 
-[프로젝트 소개](../README.md) · [구조와 설계 지도](STRUCTURE.md) · [실습 가이드](PRACTICE.md) · [보안 설계와 검증](SECURITY.md)
+[프로젝트 소개](../README.md) · [문서·검증 안내](README.md) · [구조와 설계 지도](STRUCTURE.md) · [실습 가이드](PRACTICE.md) · [보안 설계와 검증](SECURITY.md)
