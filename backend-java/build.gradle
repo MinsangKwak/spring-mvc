@@ -38,7 +38,8 @@ sourceSets {
         }
     }
     test {
-        java.srcDirs = ['backend-java/src/test/java']
+        java.srcDirs = ['docs/tests/backend-java/java']
+        resources.srcDirs = ['docs/tests/backend-java/resources']
     }
 }
 

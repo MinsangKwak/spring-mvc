@@ -1,10 +1,10 @@
 # 구조와 설계 지도
 
-현재 폴더 구조와 핵심 DTO, 요청 처리 흐름, 변경 시 확인할 범위를 정리했습니다.
+현재 폴더 구조와 핵심 DTO, 요청 처리 흐름, 변경 시 확인할 범위를 정리했습니다. 전체 문서·검증 명령 지도는 [문서·검증 안내](README.md)에서 확인할 수 있습니다.
 
 ## 1. 폴더 구조
 
-저장소 루트에는 프로젝트 소개와 빌드·배포 진입점을 둡니다. Java 서버 코드와 테스트는 `backend-java`, Thymeleaf 화면과 UI 검증 도구는 `frontend-thymeleaf`, 기술 문서는 `docs`에서 관리합니다.
+저장소 루트에는 프로젝트 소개와 빌드·배포 진입점을 둡니다. Java 서버 코드는 `backend-java`, Thymeleaf 화면은 `frontend-thymeleaf`, 테스트·검증 도구·기술 문서는 `docs`에서 관리합니다.
 
 ### 서버 코드 · `backend-java/src/main/java/com/sparta/springmvc/`
 
@@ -42,17 +42,20 @@
 
 | 위치 | 역할 |
 |---|---|
-| `backend-java/src/test/java/com/sparta/springmvc/` | JUnit·MockMvc 서버 계약 테스트. 범위는 [현재 구현과 검증](IMPROVEMENTS.md#검증-범위) 참조 |
-| `frontend-thymeleaf/tools/ui/check-ui.mjs` | 디자인 토큰·레이블·상태 안내·안전한 출력 검사. `DESIGN.md` frontmatter와 `lab.css` 토큰의 일치 확인 |
-| `frontend-thymeleaf/tools/ui/browser-smoke.mjs` | 실제 화면과 Swagger API의 브라우저 흐름 검증 |
-| `frontend-thymeleaf/tools/ui/package.json` · `package-lock.json` · `premium-ui.json` | 검증 명령·의존성 버전·대상 경로 |
+| `docs/tests/backend-java/java/com/sparta/springmvc/` | JUnit·MockMvc 서버 계약 테스트. 범위는 [현재 구현과 검증](IMPROVEMENTS.md#검증-범위) 참조 |
+| `docs/tests/frontend-thymeleaf/browser-smoke.mjs` | 실제 화면과 Swagger API의 브라우저 흐름 검증 |
+| `docs/tools/check-ui.mjs` | 디자인 토큰·레이블·상태 안내·안전한 출력 검사. `DESIGN.md` frontmatter와 `lab.css` 토큰의 일치 확인 |
+| `docs/tools/premium-ui.json` | UI 검증 대상·기능·명령 설정 |
+| `docs/package.json` · `docs/package-lock.json` | UI 정적·브라우저 검증 명령과 의존성 버전 |
 | `.github/workflows/ci.yml` | 빌드부터 512 MB Docker 실행까지 자동 검증 |
 | `backend-java/build.gradle` | Java·테스트 의존성과 백엔드·프런트엔드 `sourceSets` 정의 |
 | `settings.gradle` · `gradlew` · `gradle/wrapper/` | 루트 빌드 진입점. `settings.gradle`이 백엔드 빌드 파일을 연결 |
 | `Dockerfile` · `render.yaml` | 컨테이너 빌드와 Render 배포 설정 |
 | `.gitignore` · `.gitattributes` · `.dockerignore` | Git·Docker 기본 동작 |
 
-`settings.gradle`은 `rootProject.buildFileName`을 `backend-java/build.gradle`로 지정합니다. 따라서 `./gradlew bootRun`·`./gradlew clean build`와 루트 `build/` 산출물 경로를 유지하면서, Gradle이 `backend-java/src`와 `frontend-thymeleaf/src/main/resources`를 하나의 JAR에 포함합니다. Node.js는 화면 검증에만 사용합니다. 검증 캡처와 로그는 루트 `build/`에 생성하며 버전 관리에서 제외합니다.
+`settings.gradle`은 `rootProject.buildFileName`을 `backend-java/build.gradle`로 지정합니다. 따라서 `./gradlew bootRun`·`./gradlew clean build`와 루트 `build/` 산출물 경로를 유지하면서, Gradle이 `backend-java/src/main`과 `frontend-thymeleaf/src/main/resources`를 하나의 JAR에 포함하고 `docs/tests/backend-java/java`를 테스트 source set으로 실행합니다. Node.js는 화면 검증에만 사용합니다. 검증 캡처와 로그는 루트 `build/`에 생성하며 버전 관리에서 제외합니다.
+
+화면은 React 애플리케이션이 아니라 Spring이 제공하는 Thymeleaf 템플릿과 정적 자산입니다. 명시적 레이블·필드 오류·라이브 영역·키보드 포커스·강제 색상 모드·reduced-motion·760px 이하 반응형 배치를 현재 퍼블리싱 계약으로 유지합니다. 자동 검사는 회귀 확인용이며 전체 웹 접근성 인증을 의미하지 않습니다.
 
 ## 2. 핵심 데이터
 
@@ -72,6 +75,8 @@ DB 엔티티는 사용하지 않습니다. 아래 타입은 요청과 응답을 
 ## 3. 요청 한 건이 응답이 되기까지
 
 `POST /hello/request/form/json`을 기준으로 요청 처리 흐름을 설명하고, 다른 바인딩 방식과의 차이도 함께 정리했습니다. 1~6은 정상 응답의 처리 흐름입니다. 처리 중 예외가 발생하면 정상 흐름을 중단하고 7단계의 공통 오류 처리로 이동합니다.
+
+![Spring MVC 요청과 응답 흐름](diagrams/request-response-flow.svg)
 
 | # | 단계 | 담당 | 실패 시 예외 | 응답 `code` |
 |---|---|---|---|---|
@@ -104,4 +109,4 @@ JSON 문법·타입 오류는 `INVALID_REQUEST`와 빈 `errors[]`로 응답합�
 
 요청 DTO나 바인딩 규칙을 바꾸면 주로 `request/`를 확인해야 합니다. 공통 예외 처리(`error/`)나 Jackson 설정을 바꾸면 `controller/`·`response/`·`html/`의 응답도 함께 확인합니다.
 
-[프로젝트 소개](../README.md) · [실습 가이드](PRACTICE.md) · [현재 구현과 검증](IMPROVEMENTS.md) · [보안 설계와 검증](SECURITY.md)
+[프로젝트 소개](../README.md) · [문서·검증 안내](README.md) · [실습 가이드](PRACTICE.md) · [현재 구현과 검증](IMPROVEMENTS.md) · [보안 설계와 검증](SECURITY.md)

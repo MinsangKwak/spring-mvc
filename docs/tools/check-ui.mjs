@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-const frontendRoot = new URL('../../', import.meta.url);
-const repositoryRoot = new URL('../../../', import.meta.url);
+const frontendRoot = new URL('../../frontend-thymeleaf/', import.meta.url);
+const repositoryRoot = new URL('../../', import.meta.url);
 const readFrontend = (path) => readFileSync(new URL(path, frontendRoot), 'utf8');
 const readRepository = (path) => readFileSync(new URL(path, repositoryRoot), 'utf8');
 const css = readFrontend('src/main/resources/static/css/lab.css');

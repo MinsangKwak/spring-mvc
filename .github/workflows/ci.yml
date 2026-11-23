@@ -25,18 +25,21 @@ jobs:
           java-version: '17'
       - uses: gradle/actions/setup-gradle@v4
       - name: Build and test
-        run: ./gradlew --no-daemon clean build
+        run: |
+          ./gradlew --no-daemon clean build
+          test -n "$(find build/test-results/test -type f -name 'TEST-*.xml' -print -quit)"
+          grep -R -q '<testcase ' build/test-results/test
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
           cache: npm
-          cache-dependency-path: frontend-thymeleaf/tools/ui/package-lock.json
+          cache-dependency-path: docs/package-lock.json
       - name: Check UI contract
         run: |
-          npm ci --prefix frontend-thymeleaf/tools/ui --ignore-scripts
-          npm --prefix frontend-thymeleaf/tools/ui run check:ui
+          npm ci --prefix docs --ignore-scripts
+          npm --prefix docs run check:ui
       - name: Install browser
-        run: npm --prefix frontend-thymeleaf/tools/ui exec -- playwright install --with-deps chromium
+        run: npm --prefix docs exec -- playwright install --with-deps chromium
       - name: Verify browser flow
         shell: bash
         run: |
@@ -47,7 +50,7 @@ jobs:
             curl -sf http://127.0.0.1:8080/ >/dev/null && break
             sleep 1
           done
-          npm --prefix frontend-thymeleaf/tools/ui run test:browser
+          npm --prefix docs run test:browser
       - name: Verify deployment container
         shell: bash
         run: |
