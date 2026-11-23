@@ -6,7 +6,7 @@ Spring Boot 애플리케이션을 Render에서 실행해 웹 실습과 Java Swag
 
 ## 연결 서비스의 현재 설정
 
-2026-11-23에 Render에서 확인한 연결 서비스는 `MyWorkspace`의 `spring-mvc`입니다. 저장소 파일을 옮겨도 아래 Dashboard 설정은 자동으로 바뀌지 않습니다.
+2026-11-23에 Render에서 확인한 연결 서비스는 `My Workspace`의 `spring-mvc`입니다. Dockerfile 경로는 아래 Dashboard 설정과 저장소에서 같은 값으로 관리합니다.
 
 | 설정 | 값 |
 |---|---|
@@ -14,13 +14,13 @@ Spring Boot 애플리케이션을 Render에서 실행해 웹 실습과 Java Swag
 | Name | spring-mvc |
 | Root Directory | 비워둠 |
 | Docker Context | . |
-| Dockerfile Path | ./Dockerfile |
+| Dockerfile Path | ./backend-java/Dockerfile |
 | Auto-Deploy | 활성화 · Commit마다 배포 |
 | Health Check Path | 비워둠 · 플랫폼 기본 TCP 확인 |
 
-## 이 구조를 병합하기 전 변경
+## 실행 경계
 
-연결 서비스의 Dockerfile Path를 `./backend-java/Dockerfile`로 저장한 뒤 이 구조를 `main`에 병합해야 합니다. Root Directory는 비워두고 Docker Context는 `.`을 유지합니다. 현재 저장소 변경만으로 이 Dashboard 값은 바뀌지 않습니다.
+저장소 전체를 빌드 컨텍스트로 사용하고 `backend-java/Dockerfile`로 서버와 화면 자산을 함께 묶습니다. Root Directory는 비워두고 Docker Context는 `.`을 사용합니다. `backend-java/`만 컨텍스트로 지정하면 형제 폴더의 화면 자산을 읽을 수 없습니다.
 
 Docker Command와 별도 빌드·시작 명령은 지정하지 않습니다. Dockerfile의 ENTRYPOINT로 실행합니다. DB·API 키·별도 환경변수 입력은 필요하지 않습니다.
 
@@ -32,7 +32,7 @@ Docker Command와 별도 빌드·시작 명령은 지정하지 않습니다. Doc
 - 실행 단계: Java 17 JRE에서 비관리자 UID로 JAR 실행
 - 메모리: 무료 인스턴스의 512 MB를 고려해 Java 최대 힙을 256 MB로 제한
 - 포트: Render의 PORT 환경변수를 사용하고, 없으면 10000으로 실행
-- 프록시: 전달된 HTTPS 정보를 반영해 Swagger 요청 URL을 생성
+- API 문서: 전달 헤더와 무관하게 OpenAPI 서버 주소를 상대 경로 `/`로 고정
 
 힙 제한은 전체 프로세스 메모리 제한이 아닙니다. 실제 메모리 사용량과 시작 시간은 Render 로그에서 확인합니다. 데이터는 DB에 저장하지 않으며 방문 횟수는 재시작하면 초기화됩니다.
 
